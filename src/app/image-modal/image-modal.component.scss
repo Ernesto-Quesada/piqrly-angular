@@ -1,0 +1,100 @@
+
+@use '@angular/material' as mat;
+
+mat-card {
+    padding: 0;
+  }
+  img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+
+  .example-button-container {
+    display: flex;
+    justify-content: center;
+    width: 140px;
+  }
+
+  .modal-card {
+    position: relative;
+    padding: 0;
+    overflow: hidden;
+  
+  }
+  
+  .full-image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  .back-button {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: rgb(0, 0, 0);
+    border:none;
+    z-index: 10;
+  }
+  .back-button-icon {
+    color: white;
+    font-size: 24px; /* Adjust icon size */
+  }
+  
+  .check-button {
+    // position: absolute;
+    // top: 8px;
+    // right: 8px;
+    background: rgba(255, 255, 255);
+    z-index: 10;
+  }
+  .modal-bottom-icon {
+    color: #fff;
+  }
+  
+
+
+
+
+  /* Top icons: back arrow and check mark */
+.dialog-top-icons {
+  position: fixed;
+  top: 16px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 1001; /* Ensure it sits above the dialog and backdrop */
+}
+
+/* Bottom icons: evenly spaced comments, like, share */
+.dialog-bottom-icons {
+  position: fixed;
+  bottom: 16px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+  z-index: 1001;
+}
+
+/* Center the modal content in the viewport */
+// .modal-content {
+//   display: flex;
+//   justify-content: center;
+//   align-items: center;
+//   /* Ensure it fills available space but doesn't interfere with fixed icons */
+//   min-height: 100vh;
+// }
+
+/* Modal card styling */
+
+/* Full image styling */
+.full-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}

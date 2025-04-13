@@ -1,4 +1,40 @@
 /* You can add global styles to this file, and also import other style files */
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+@use '@angular/material' as mat;
+html, body { height: 100vh; }
+body { 
+    margin: 0; 
+    font-family: Lato, Roboto, sans-serif !important;
+    color: #5b5b5b;
+    background-color: #f8fafd; /* Default background color for the body */}
+// .app-color {
+//     color: #f6fdff
+// }
+// .app-bgc {
+//     background-color: #242627
+// }
+.mat-icon {
+    color: #5b5b5b; /* Applies color to all Angular Material icons */
+  }
+  
+  mat-list-item  span{
+    color: #5b5b5b; /* Applies text color to list items */
+  }
+  mat-sidenav-container {
+    background-color: #f8fafd;
+  }
+  mat-sidenav {background-color: #f0f4f9 ;} .mat-drawer {
+    background-color: #f8fafd;
+  }
+ 
+  .custom-backdrop {
+    background-color: rgba(0, 0, 0, 0.95) !important;
+  }
+  .disabledCheckoutColor{
+    color: rgba(26, 27, 31)!important;
+    background-color: rgba(26, 27, 31, 0.12) !important;
+  }
+  .enabledCheckout{
+    background-color: #ffcd0e !important;
+    color:#303030!important;
+  }

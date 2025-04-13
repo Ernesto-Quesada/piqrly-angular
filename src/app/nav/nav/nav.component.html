@@ -1,10 +1,25 @@
-<mat-toolbar color="primary">
-    <span>My App</span>
-    <div class="spacer"></div>
-    <button mat-button routerLink="/">Home</button>
-    <button mat-button routerLink="/about">About</button>
-    <button mat-button routerLink="/contact">Contact</button>
-    <button mat-icon-button>
-      <mat-icon>settings</mat-icon>
-    </button>
-  </mat-toolbar>
+
+  <mat-expansion-panel hideToggle>
+    <mat-expansion-panel-header class="nav-header">
+      <!-- <mat-panel-title> This is the expansion title </mat-panel-title> -->
+      <mat-panel-description>
+        <div class="container-fluid">
+          <div class="row d-flex text-center">
+            <div class="col">
+              <mat-icon class="material-symbols-outlined app-color">expand_circle_down</mat-icon>
+            </div>
+          </div>
+        </div>
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+    <nav class="navbar navbar-expand-lg ">
+      <div class="container-fluid ">
+        <a class="navbar-brand app-color" href="/">LOGO</a>
+        <a class="nav-link active" aria-current="page" href="#">Home</a>
+      </div>
+    </nav>
+  </mat-expansion-panel>
+
+
+
+ 

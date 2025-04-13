@@ -1,0 +1,52 @@
+
+.add-tocard-wrap {
+   background-color: #fff;
+   z-index: 1;
+   border: none;
+}
+.add-tocard-wrap {
+    height: 100%;
+    flex-direction: column;
+    
+  }
+  
+  .example-card-footer {
+    display: flex;
+    justify-content: center;
+  }
+  mat-card-subtitle{
+    text-align: center;
+    font-size: 16px;
+    color: #1a1b1f;
+    font-family: Lato, Roboto, sans-serif
+  }
+  .pick-size-button {
+border-radius: 0;
+  }
+  .size-select-info {
+    font-size: 14px;
+    color: #324960;
+    text-align: justify;
+    margin-bottom: 8px;
+    line-height: 1.3;
+    .mat-icon {
+        color: #6d8fb0;
+      vertical-align: middle; /* Align icon with text */
+      margin-right: 4px; /* Space between icon and text */
+      font-size: 1rem;
+    }
+  }
+  .icon_size{
+    font-size: 36px;
+    width: 36px; /* Ensures the icon is clickable and large enough */
+    height: 36px; /* Ensures the icon is clickable and large enough */
+  }
+  .size_font {
+    font-size: 20px;
+  }
+  .mat-icon_info {
+    color: #6d8fb0; /* Color for the info icon */
+    vertical-align: middle; /* Align icon with text */
+    margin-right: 4px; /* Space between icon and text */
+    font-size: 1.2rem; /* Adjust size of the icon */
+  }

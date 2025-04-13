@@ -1,0 +1,32 @@
+@use '@angular/material' as mat;
+.sidebar1 {
+    height: 100%;
+}
+
+  mat-sidenav {
+    width: 300px;
+    max-width: 300px;
+    background-color: #f0f4f9 ;
+   
+  }
+  mat-sidenav-container {
+   overflow-y: visible;
+  }
+
+  .mat-sidenav {
+    border-radius: 0; /* Remove border-radius */
+    background-color: #f0f4f9 ;
+  }
+  .sidenav-footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%; /* Full width for the footer */
+  }
+  ::ng-deep mat-list-item > .mdc-list-item__content > span{
+    display: flex ;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  .mat-drawer-content {
+    display: inline;
+  }

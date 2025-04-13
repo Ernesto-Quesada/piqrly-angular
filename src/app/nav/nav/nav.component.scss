@@ -1,0 +1,19 @@
+@use '@angular/material' as mat;
+.nav {
+    @include mat.toolbar-overrides((
+      container-background-color: rgb(15, 15, 15),
+      
+    ));
+  }
+
+  .mat-expansion-panel{
+    border: none;
+    border-radius: 0;
+    color: #edeff4;
+    background-color: #242627 ;
+}
+.nav-header {
+  @include mat.expansion-overrides((
+    container-background-color: #242627,
+  ));
+}

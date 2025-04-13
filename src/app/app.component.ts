@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { NavComponent } from './nav/nav/nav.component';
+import { AppWrapperComponent } from './app-wrapper/app-wrapper.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, NavComponent],
+  imports: [RouterOutlet,AppWrapperComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

@@ -1,0 +1,41 @@
+/* checkout.component.scss */
+// .checkout-card {
+   
+//   }
+  
+  .full-width {
+    width: 100%;
+  }
+  
+  .picture-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .picture-thumb {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    margin-right: 1rem;
+  }
+  .image-wrapper {
+    max-height: 80px;
+  }
+  .checkout-image {   
+    max-height:116px;
+    max-width: 170px;
+    width: auto;
+  }
+  .image-details{
+    max-height: 180px;
+    height: 180px;
+  }
+  // .disabledCheckoutColor{
+  //   color: rgba(26, 27, 31);
+  //   background-color: rgba(26, 27, 31, 0.12)
+  // }
+  // .enabledCheckout,.enabledCheckout:not(:disabled){
+  //   background-color: #ffcd0e;
+  //   color:#303030;
+  // }

@@ -1,0 +1,100 @@
+<mat-card class="add-tocard-wrap h-100 w-100 d-flex">
+  <mat-card-header class="justify-content-center cart-card-header pt-2">
+    <!-- <ng-container  *ngIf="selectedSize$ | async as size; else pickSize" >
+
+            <mat-card-subtitle class="d-flex">{{size  | uppercase}} SIZE  was chosen<mat-icon class="mat-icon_info ps-1">info_outline</mat-icon></mat-card-subtitle>
+
+
+        </ng-container>
+        <ng-template #pickSize>
+            <mat-card-subtitle class="d-flex">PICK SIZE<mat-icon class="mat-icon_info ps-1">info_outline</mat-icon></mat-card-subtitle>
+        </ng-template> -->
+
+    <mat-card-subtitle class="d-flex"
+      >PICK SIZE<mat-icon class="mat-icon_info ps-1"
+        >info_outline</mat-icon
+      ></mat-card-subtitle
+    >
+  </mat-card-header>
+  <hr class="m-0" />
+  <!-- <mat-card-actions class="justify-content-around">
+        <button mat-raised-button  (click)="chooseSize('small')">SMALL</button>
+        <button mat-raised-button  (click)="chooseSize('full')">FULL</button>
+    </mat-card-actions> -->
+  <mat-card-content class="px-0">
+    <!-- <button mat-raised-button class="px-3 h-100 pick-size-button" (click)="chooseSize('small')"> -->
+    <button mat-raised-button class="px-3 h-100 pick-size-button">
+      <div class="row">
+        <div class="col-4 text-center">
+          <mat-icon class="icon_size">photo_size_select_small</mat-icon>
+          <p class="size_font">SMALL</p>
+        </div>
+        <div class="col-8">
+          <p class="text-sm-start size-select-info pt-1">
+            great for social media sharing and phone viewing
+          </p>
+          <div class="row">
+            <div class="col-md-6 text-end">
+              <!-- <ng-container *ngIf="prices$ | async as prices">
+                    <span style="font-size: 18px;">{{ prices.small| currency}}</span><span> each</span>
+                </ng-container> -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </button>
+  </mat-card-content>
+
+  <mat-card-content class="px-0">
+    <!-- <button mat-raised-button class="px-3 h-100 pick-size-button" (click)="chooseSize('full')"> -->
+    <button mat-raised-button class="px-3 h-100 pick-size-button">
+      <div class="row">
+        <div class="col-4 text-center">
+          <mat-icon class="icon_size">photo_size_select_large</mat-icon>
+          <p class="size_font">FULL</p>
+        </div>
+        <div class="col-8">
+          <!-- <p *ngIf="!selectedSize" >Please select a size</p> -->
+          <!-- <p *ngIf="selectedSize" class="text-success">Selected Size: {{ selectedSize | uppercase }}</p> -->
+          <p class="text-sm-start size-select-info pt-1">
+            best quality for printing and keep a memory at home
+          </p>
+          <div class="row">
+            <div class="col-md-6 text-end">
+              <!-- <ng-container *ngIf="prices$ | async as prices">
+                <span style="font-size: 18px">{{ prices.full | currency }}</span
+                ><span> each</span>
+              </ng-container> -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </button>
+  </mat-card-content>
+  <mat-card-content class="mt-2">
+    <div class="mt-2">
+      <p class="text-end">
+        Total:
+        <span style="font-size: 32px; font-weight: 400">
+          {{ totalPrice$ | async | currency }}</span
+        >
+      </p>
+    </div>
+  </mat-card-content>
+
+  <mat-card-footer class="example-card-footer mb-3">
+    <!-- <button mat-raised-button color="primary" (click)="addToCart()">Add to Cart</button> -->
+    <div class="d-grid gap-2 col-8 mx-auto">
+      <button
+        mat-raised-button
+        [disabled]="!(canCheckout$ | async)"
+        [ngClass]="
+          (canCheckout$ | async) ? 'enabledCheckout' : 'disabledCheckoutColor'
+        "
+        (click)="startCheckout()"
+      >
+        Checkout
+      </button>
+    </div>
+  </mat-card-footer>
+</mat-card>
