@@ -18,5 +18,20 @@ export class CheckoutSuccessComponent implements OnInit {
   ngOnInit(): void {
     this.sessionId = this.route.snapshot.queryParamMap.get('session_id');
     // Optionally, call your backend to verify session details.
+    if (this.sessionId) {
+      // this.http
+      //   .post('/verify-session', { sessionId: this.sessionId })
+      //   .subscribe((res: any) => {
+      //     if (res.paid) {
+      //       // Optional: Display customer info from res
+      //       // Now fetch the actual pictures allowed for download
+      //       this.http
+      //         .get(`/api/paid-pictures/${this.sessionId}`)
+      //         .subscribe((data: any) => {
+      //           this.paidImages = data.pictureUrls; // assuming backend returns pre-signed URLs
+      //         });
+      //     }
+      //   });
+    }
   }
 }

@@ -30,7 +30,7 @@ export interface ShopCart {
   user?: {
     fullName: string;
     email: string;
-    address: string;
+    // address: string;
     // Other data required by your backend/Stripe
   };
 }

@@ -31,6 +31,7 @@ import { CheckoutService } from '../services/checkout.service';
 import { loadStripe } from '@stripe/stripe-js';
 import { StripeService } from 'ngx-stripe';
 import { updateCheckoutForm } from '../store/actions/shopcart.actions';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-checkout',
@@ -42,6 +43,7 @@ import { updateCheckoutForm } from '../store/actions/shopcart.actions';
     MatInputModule,
     MatButtonModule,
     RouterModule,
+    MatIconModule,
   ],
   templateUrl: './checkout.component.html',
   styleUrls: ['./checkout.component.scss'],
@@ -57,6 +59,18 @@ export class CheckoutComponent implements OnInit {
   totalPrice$: Observable<number>;
   // images: Image[] = [];
   // someImages: any[] = [];
+  itemTotals = {
+    fullSizeItems: 0,
+    fullSizeSubT: 0,
+    fullSizePriceEach: 0,
+
+    smallItems: 0,
+    smallSizeSubT: 0,
+    smallSizePriceEach: 0,
+
+    itemTotal: 0,
+    grandTotal: 0,
+  };
 
   constructor(
     private fb: FormBuilder,
@@ -67,7 +81,7 @@ export class CheckoutComponent implements OnInit {
     this.checkoutForm = this.fb.group({
       fullName: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      address: ['', Validators.required],
+      // address: ['', Validators.required],
       // Additional fields as needed.
     });
 
@@ -82,6 +96,37 @@ export class CheckoutComponent implements OnInit {
     this.checkoutForm.valueChanges.subscribe((value) => {
       this.store.dispatch(updateCheckoutForm({ formValues: value }));
     });
+    this.checkoutState$
+      .pipe(
+        map((cartState) => {
+          const fullItems = cartState.items.filter(
+            (item) => item.size === 'full'
+          );
+          const smallItems = cartState.items.filter(
+            (item) => item.size === 'small'
+          );
+
+          this.itemTotals = {
+            fullSizeItems: fullItems.length ? fullItems.length : 0,
+            fullSizeSubT: fullItems.reduce((sum, item) => sum + item.price, 0),
+            fullSizePriceEach: fullItems.length > 0 ? fullItems[0].price : 0,
+
+            smallItems: smallItems.length ? smallItems.length : 0,
+            smallSizeSubT: smallItems.reduce(
+              (sum, item) => sum + item.price,
+              0
+            ),
+            smallSizePriceEach: smallItems.length > 0 ? smallItems[0].price : 0,
+            itemTotal: cartState.items.length,
+
+            grandTotal: cartState.items.reduce(
+              (sum, item) => sum + item.price,
+              0
+            ),
+          };
+        })
+      )
+      .subscribe();
   }
 
   async pay() {

@@ -1,4 +1,3 @@
-import { selectPrices } from './../store/selectors/cart.selector';
 export interface Image {
   pictureId: string; // Unique identifier for the image
   url: string; // URL of the image

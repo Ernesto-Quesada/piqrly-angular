@@ -1,37 +1,50 @@
 <div class="h-100">
-    <mat-sidenav-container class="example-container w-100 h-100">
-        <mat-sidenav #sidenav mode="side" [(opened)]="opened">
-         
-          <mat-list>
-            <mat-list-item>
-              <mat-icon>home</mat-icon>
-              <span class="ml-2 ps-3 pt-1">Home</span>
-            </mat-list-item>
-          
-            <mat-list-item>
-              <mat-icon>download</mat-icon>
-              <span class="ml-2 ps-3 pt-1">Download App</span>
-            </mat-list-item>
-          </mat-list>
-          <div class="sidenav-footer ml-2 ps-2">
-            <!-- <mat-list-item class="list-item"> -->
-              <mat-icon>gavel</mat-icon>
-              <span class="ml-2 ps-3 pt-1">TaC</span>
-            <!-- </mat-list-item> -->
-          </div>
-        </mat-sidenav>
-    
-        <mat-sidenav-content>
-          <!-- <p><mat-checkbox [(ngModel)]="opened" style="color: white;">sidenav.opened</mat-checkbox></p> -->
-          <!-- <p><button mat-button (click)="sidenav.toggle() ">sidenav.toggle()</button></p> -->
-          <button mat-icon-button (click)="toggleSidenav(sidenav)" class="position-absolute">
-            <mat-icon [@iconState]="opened ? 'opened' : 'closed'">
-              {{ opened ? 'chevron_right' : 'menu' }}
-            </mat-icon>
-          </button>
-        
-          <router-outlet></router-outlet>
+  <mat-sidenav-container class="example-container w-100 h-100">
+    <mat-sidenav #sidenav mode="side" [(opened)]="opened">
+      <mat-list>
+        <mat-list-item>
+          <mat-icon>home</mat-icon>
+          <span class="ml-2 ps-3 pt-1">Home</span>
+        </mat-list-item>
 
-        </mat-sidenav-content>
-      </mat-sidenav-container>
+        <mat-list-item>
+          <mat-icon>download</mat-icon>
+          <span class="ml-2 ps-3 pt-1">Download App</span>
+        </mat-list-item>
+      </mat-list>
+      <div class="sidenav-footer ml-2 ps-2">
+        <!-- <mat-list-item class="list-item"> -->
+        <mat-icon>gavel</mat-icon>
+        <span class="ml-2 ps-3 pt-1">TaC</span>
+        <!-- </mat-list-item> -->
+      </div>
+    </mat-sidenav>
+
+    <mat-sidenav-content>
+      <!-- <p><mat-checkbox [(ngModel)]="opened" style="color: white;">sidenav.opened</mat-checkbox></p> -->
+      <!-- <p><button mat-button (click)="sidenav.toggle() ">sidenav.toggle()</button></p> -->
+      <button
+        mat-icon-button
+        (click)="toggleSidenav(sidenav)"
+        class="position-absolute"
+      >
+        <mat-icon [@iconState]="opened ? 'opened' : 'closed'">
+          {{ opened ? "chevron_right" : "menu" }}
+        </mat-icon>
+      </button>
+      <button
+        *ngIf="cartBadgeCount > 0"
+        mat-icon-button
+        [routerLink]="['/checkout']"
+        routerLinkActive="router-link-active"
+        class="position-absolute shopping-cart"
+      >
+        <span matBadge="{{ cartBadgeCount }}" class="material-icons-outlined">
+          shopping_cart
+        </span>
+      </button>
+
+      <router-outlet></router-outlet>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
 </div>

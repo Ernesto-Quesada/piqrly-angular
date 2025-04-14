@@ -48,5 +48,5 @@ export const checkoutCartPayload = createAction(
 );
 export const updateCheckoutForm = createAction(
   '[Checkout] Update Form',
-  props<{ formValues: { fullName: string; email: string; address: string } }>()
+  props<{ formValues: { fullName: string; email: string } }>()
 );

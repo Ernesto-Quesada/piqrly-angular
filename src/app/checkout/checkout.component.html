@@ -1,7 +1,7 @@
 <div class="container-fluid d-flex flex-column h-100">
-  <div class="card">
+  <div class="card mt-5 mb-4">
     <div class="card-body">
-      <h4 class="card-title mb-3">Checkout</h4>
+      <h6 class="card-title mb-3">Checkout</h6>
       <form [formGroup]="checkoutForm" (ngSubmit)="pay()">
         <div class="row">
           <div class="col-md-6">
@@ -10,10 +10,13 @@
                 formControlName="fullName"
                 type="text"
                 class="form-control"
-                id="tb-fname"
+                id="fname"
                 placeholder="Enter Name here"
               />
-              <label for="tb-fname">Full Name</label>
+              <label class="d-flex" for="fname">
+                <mat-icon class="me-2">person_outline</mat-icon>
+                <span class="border-start border-info ps-3">Name</span>
+              </label>
             </div>
           </div>
 
@@ -26,9 +29,61 @@
                 id="tb-email"
                 placeholder="email@example.com"
               />
-              <label for="tb-email">Email</label>
+              <label class="d-flex" for="tb-email">
+                <span class="material-icons-outlined me-2"> email </span>
+                <span class="border-start border-info ps-3">Email</span>
+              </label>
             </div>
           </div>
+          <div class="row ms-0">
+            <div class="col-8">
+              <p class="">item total</p>
+            </div>
+            <div class="col-4">
+              <p class="text-end co-font-size">
+                {{ itemTotals.itemTotal }} items
+              </p>
+            </div>
+          </div>
+
+          <div class="row ms-0 mb-3" *ngIf="itemTotals.fullSizeItems > 0">
+            <div class="col-8">
+              <p class="mb-0 lineh1">
+                full size pictures
+                <span class="co-font-size">{{ itemTotals.fullSizeItems }}</span>
+              </p>
+              <span class="price-each">
+                {{ itemTotals.fullSizePriceEach | currency }}each
+              </span>
+              <span class="price-each bkg-i">best for prints</span>
+            </div>
+            <div class="col-4">
+              <p class="text-end sub-font-size">
+                {{ itemTotals.fullSizeSubT | currency }}
+              </p>
+            </div>
+          </div>
+
+          <div class="row ms-0 mb-3" *ngIf="itemTotals.smallItems > 0">
+            <div class="col-8">
+              <p class="mb-0 lineh1">
+                small size pictures
+                <span class="co-font-size">{{ itemTotals.smallItems }}</span>
+              </p>
+              <span class="price-each">
+                {{ itemTotals.smallSizePriceEach | currency }}each
+              </span>
+              <span class="price-each bkg-i">best for social media</span>
+            </div>
+            <div class="col-4">
+              <p class="text-end sub-font-size">
+                {{ itemTotals.smallSizeSubT | currency }}
+              </p>
+            </div>
+          </div>
+          <p class="total text-end sub-font-size">
+            Total: {{ itemTotals.grandTotal | currency }}
+          </p>
           <!-- <div class="col-md-6">
             <div class="form-floating mb-3">
               <input
@@ -53,18 +108,7 @@
           </div> -->
           <div class="col-12">
             <div class="d-md-flex align-items-center">
-              <div class="form-check">
-                <input
-                  class="form-check-input"
-                  type="checkbox"
-                  value=""
-                  id="flexCheckDefault"
-                />
-                <label class="form-check-label" for="flexCheckDefault">
-                  Remember me
-                </label>
-              </div>
-              <div class="d-grid gap-2 col-8 mx-auto">
+              <div class="d-grid gap-2 col-8 mx-auto mt-3">
                 <button
                   mat-raised-button
                   type="submit"
@@ -78,52 +122,15 @@
                   Pay Now
                 </button>
               </div>
+              <span class="text-center" style="font-size: 9px; display: block"
+                >Powered by STRIPE</span
+              >
             </div>
           </div>
         </div>
       </form>
     </div>
   </div>
-  <mat-card class="checkout-card d-flex flex-column">
-    <mat-card-subtitle>Checkout </mat-card-subtitle>
-
-    <!-- Grand Total -->
-    <p class="total">Total: {{ totalPrice$ | async | currency }}</p>
-
-    <!-- User Info Form -->
-    <!-- <form [formGroup]="checkoutForm" (ngSubmit)="pay()">
-      <mat-form-field appearance="outline">
-        <mat-label>Full Name</mat-label>
-        <input matInput formControlName="fullName" required />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Email</mat-label>
-        <input matInput formControlName="email" required />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Address</mat-label>
-        <input matInput formControlName="address" required />
-      </mat-form-field> -->
-
-    <!-- Stripe Card Element -->
-    <!-- / <ngx-stripe-card [options]="cardOptions" [elementsOptions]="elementsOptions"></ngx-stripe-card> -->
-
-    <!-- Submit -->
-    <!-- <p>{{ checkoutForm.invalid }}</p>
-      <button
-        mat-raised-button
-        type="submit"
-        [ngClass]="
-          checkoutForm.invalid ? 'disabledCheckoutColor' : 'enabledCheckout'
-        "
-        [disabled]="checkoutForm.invalid"
-      >
-        Pay Now
-      </button>
-    </form> -->
-  </mat-card>
 
   <ng-container *ngFor="let image of selectedImages$ | async">
     <div class="card w-100 mb-2">
@@ -148,78 +155,4 @@
             </div> -->
     </div>
   </ng-container>
-  <div class="card">
-    <div class="card-body">
-      <h4 class="card-title mb-3">Basic Form</h4>
-      <form>
-        <div class="row">
-          <div class="col-md-6">
-            <div class="form-floating mb-3">
-              <input
-                type="text"
-                class="form-control"
-                id="tb-fname"
-                placeholder="Enter Name here"
-              />
-              <label for="tb-fname">Name</label>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="form-floating mb-3">
-              <input
-                type="email"
-                class="form-control"
-                id="tb-email"
-                placeholder="name@example.com"
-              />
-              <label for="tb-email">Email address</label>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="form-floating mb-3">
-              <input
-                type="password"
-                class="form-control"
-                id="tb-pwd"
-                placeholder="Password"
-              />
-              <label for="tb-pwd">Password</label>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="form-floating mb-3">
-              <input
-                type="password"
-                class="form-control"
-                id="tb-cpwd"
-                placeholder="Password"
-              />
-              <label for="tb-cpwd">Confirm Password</label>
-            </div>
-          </div>
-          <div class="col-12">
-            <div class="d-md-flex align-items-center">
-              <div class="form-check">
-                <input
-                  class="form-check-input"
-                  type="checkbox"
-                  value=""
-                  id="flexCheckDefault"
-                />
-                <label class="form-check-label" for="flexCheckDefault">
-                  Remember me
-                </label>
-              </div>
-              <div class="ms-auto mt-3 mt-md-0">
-                <button type="submit" class="btn btn-primary hstack gap-6">
-                  <i class="ti ti-send fs-4"></i>
-                  Submit
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
 </div>

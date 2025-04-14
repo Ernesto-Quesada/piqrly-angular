@@ -17,10 +17,10 @@ export const selectPicturePrices = createSelector(
   selectCartState,
   (state: Cart) => state.prices
 );
-export const selectPrices = createSelector(
-  selectCartState,
-  (cart: Cart) => cart.prices
-);
+// export const selectPrices = createSelector(
+//   selectCartState,
+//   (cart: Cart) => cart.prices
+// );
 export const cartTotalPrices = createSelector(
   selectCartState,
   (cart: Cart) => cart.prices

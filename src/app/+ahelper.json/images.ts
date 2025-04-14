@@ -27,7 +27,7 @@ const images: Image[] = [
 const landingDataMock: LandingData = {
   pictures: images, // Array of images
   qr: '12345', // QR code ID
-  price: { small: 10, full: 20 }, // Price object containing small and full prices
+  price: { small: 1.3, full: 15 }, // Price object containing small and full prices
   user: {
     // User information
     name: 'John Doe', // User's name

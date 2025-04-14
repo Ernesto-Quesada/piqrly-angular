@@ -1,37 +1,43 @@
 <!-- Top fixed icons over the backdrop -->
 <div class="dialog-top-icons">
-    <button mat-icon-button (click)="closeModal()" class="back-button">
-      <mat-icon class="back-button-icon">arrow_back</mat-icon>
-    </button>
-   
-  </div>
-  
-  <!-- Centered modal content -->
-  <div class="modal-content">
-    <mat-card class="modal-card">
-      <img [src]="data.image.url" class="full-image" alt="Full Image" />
-    </mat-card>
-    
-  </div>
+  <button mat-icon-button (click)="closeModal()" class="back-button">
+    <mat-icon class="back-button-icon">arrow_back</mat-icon>
+  </button>
+</div>
 
-  
-  <!-- Bottom fixed icons over the backdrop -->
-  <div class="dialog-bottom-icons">
-    <button mat-icon-button>
-      <mat-icon class="modal-bottom-icon">chat_bubble_outline</mat-icon>
-    </button>
-    <button mat-raised-button (click)="chooseSizeAndAdd('small')" class="check-button">Add Small
-        <!-- <mat-icon>check_circle</mat-icon> -->
-    </button>
-    <button mat-raised-button (click)="chooseSizeAndAdd('full')" class="check-button">Add Full
-      <!-- <mat-icon>check_circle</mat-icon> -->
-    </button>
-      
-    <button mat-icon-button>
-      <mat-icon  class="modal-bottom-icon">favorite_border</mat-icon>
-    </button>
-    <!-- <button mat-icon-button>
+<!-- Centered modal content -->
+<div class="modal-content">
+  <mat-card class="modal-card">
+    <img [src]="data.image.url" class="full-image" alt="Full Image" />
+  </mat-card>
+</div>
+
+<!-- Bottom fixed icons over the backdrop -->
+<div class="dialog-bottom-icons">
+  <button mat-icon-button>
+    <mat-icon class="modal-bottom-icon">chat_bubble_outline</mat-icon>
+  </button>
+  <button
+    mat-raised-button
+    (click)="chooseSizeAndAdd('small')"
+    class="check-button"
+  >
+    Add Small
+    <!-- <mat-icon>check_circle</mat-icon> -->
+  </button>
+  <button
+    mat-raised-button
+    (click)="chooseSizeAndAdd('full')"
+    class="check-button"
+  >
+    Add Full
+    <!-- <mat-icon>check_circle</mat-icon> -->
+  </button>
+
+  <button mat-icon-button>
+    <mat-icon class="modal-bottom-icon">favorite_border</mat-icon>
+  </button>
+  <!-- <button mat-icon-button>
       <mat-icon>share</mat-icon>
     </button> -->
-  </div>
-  
+</div>

@@ -30,3 +30,11 @@
   .mat-drawer-content {
     display: inline;
   }
+  .shopping-cart {
+    right: 1rem
+  }
+  ::ng-deep .mat-badge-content{
+    background-color: #ffcd0e !important ;
+    color:#303030!important ;
+    font-size: 0.9rem!important ;
+  }
