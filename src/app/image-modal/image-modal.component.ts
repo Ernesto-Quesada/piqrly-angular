@@ -3,7 +3,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { select, Store } from '@ngrx/store';
-import { addImageToCart } from '../store/actions/cart.actions';
+import { addImageToCart } from '../store/actions/shopcart.actions';
 import { ShopCart } from './../models/shopCart';
 import { Image } from '../models/image';
 import { MatButtonModule } from '@angular/material/button';

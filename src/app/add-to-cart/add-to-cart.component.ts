@@ -16,10 +16,10 @@ import { ShopCart } from './../models/shopCart';
 import { Image } from '../models/image';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
-import {
-  checkoutCartStarted,
-  setCheckoutData,
-} from '../store/actions/checkout-cart.actions';
+// import {
+//   // checkoutCartStarted,
+//   setCheckoutData,
+// } from '../store/actions/checkout-cart.actions';
 import {
   checkoutCartPayload,
   setChosenSize,
@@ -76,7 +76,7 @@ export class AddToCartComponent {
   startCheckout(): void {
     this.canCheckout$.pipe(take(1)).subscribe((canCheckout) => {
       if (canCheckout) {
-        this.store.dispatch(checkoutCartStarted());
+        // this.store.dispatch(checkoutCartStarted());
         this.router.navigate(['/checkout']);
       } else {
         this.disabledCheckout = true;

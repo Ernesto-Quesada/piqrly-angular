@@ -25,7 +25,7 @@ import {
   selectShopCartState,
   selectSubtotalPrice,
 } from '../store/selectors/shopcart.selector';
-import { checkoutCartPayload } from '../store/actions/checkout-cart.actions';
+// import { checkoutCartPayload } from '../store/actions/checkout-cart.actions';
 import { RouterModule } from '@angular/router';
 import { CheckoutService } from '../services/checkout.service';
 import { loadStripe } from '@stripe/stripe-js';
@@ -139,7 +139,7 @@ export class CheckoutComponent implements OnInit {
         pictureIds: state.items.map((item) => item.image.pictureId),
       };
     });
-
+    // TODO MOVE TO SERVICE
     this.checkoutService
       .createCheckoutSession(payload)
       .subscribe(async (data) => {
