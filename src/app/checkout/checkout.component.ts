@@ -129,7 +129,8 @@ export class CheckoutComponent implements OnInit {
       .subscribe();
   }
 
-  async pay() {
+  pay(event: Event) {
+    event.preventDefault();
     let payload: any = {};
 
     this.checkoutState$.subscribe((state) => {
@@ -144,7 +145,7 @@ export class CheckoutComponent implements OnInit {
       .createCheckoutSession(payload)
       .subscribe(async (data) => {
         const sessionId = data.sessionId;
-        console.log('Session ID:', sessionId);
+        console.log('Session ID in checkout:', sessionId);
         const stripe = await this.stripePromise;
         stripe?.redirectToCheckout({
           sessionId: data.sessionId,

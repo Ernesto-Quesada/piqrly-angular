@@ -12,6 +12,8 @@ export class CheckoutService {
   createCheckoutSession(payload: any): Observable<{ sessionId: string }> {
     return this.http.post<{ sessionId: string }>(
       'http://localhost:8080/create-checkout-session',
+      // for test on phone
+      // 'http://192.168.0.107:8080/create-checkout-session',
       payload
     );
   }

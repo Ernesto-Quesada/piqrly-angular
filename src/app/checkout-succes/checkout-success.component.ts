@@ -1,7 +1,9 @@
+import { CheckoutService } from './../services/checkout.service';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { ActivatedRoute } from '@angular/router';
+import { PictureService } from '../services/picture.service';
 
 @Component({
   selector: 'checkout-success',
@@ -13,25 +15,29 @@ import { ActivatedRoute } from '@angular/router';
 export class CheckoutSuccessComponent implements OnInit {
   sessionId: string | null = null;
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(
+    private route: ActivatedRoute,
+    private checkoutService: CheckoutService,
+    private pictureService: PictureService
+  ) {}
 
   ngOnInit(): void {
     this.sessionId = this.route.snapshot.queryParamMap.get('session_id');
+    console.log('Session ID after chechout:', this.sessionId);
     // Optionally, call your backend to verify session details.
     if (this.sessionId) {
-      // this.http
-      //   .post('/verify-session', { sessionId: this.sessionId })
-      //   .subscribe((res: any) => {
-      //     if (res.paid) {
-      //       // Optional: Display customer info from res
-      //       // Now fetch the actual pictures allowed for download
-      //       this.http
-      //         .get(`/api/paid-pictures/${this.sessionId}`)
-      //         .subscribe((data: any) => {
-      //           this.paidImages = data.pictureUrls; // assuming backend returns pre-signed URLs
-      //         });
-      //     }
-      //   });
+      this.checkoutService
+        .verifyCheckoutSession(this.sessionId)
+        .subscribe((res: any) => {
+          console.log('Session verified:', res);
+          if (res.paid && this.sessionId) {
+            this.pictureService
+              .getPaidPictures(this.sessionId)
+              .subscribe((data: any) => {
+                console.log('DATA', data); // assuming backend returns pre-signed URLs
+              });
+          }
+        });
     }
   }
 }
