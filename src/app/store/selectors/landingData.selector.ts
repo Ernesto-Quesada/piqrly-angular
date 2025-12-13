@@ -1,20 +1,20 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { LandingData } from '../../models/image';
+import { QrViewResponse } from '../../models/qr-read-response';
 
 export const selectLandingDataState =
-  createFeatureSelector<LandingData>('landingData');
+  createFeatureSelector<QrViewResponse>('landingData');
 
 export const selectLandingPictures = createSelector(
   selectLandingDataState,
-  (landingState: LandingData) => landingState.pictures
+  (landingState: QrViewResponse) => landingState.pictures
 );
 
-export const selectLandingPricesforImage = createSelector(
-  selectLandingDataState,
-  (state: LandingData) => state.pictures
-);
+// export const selectLandingPricesforImage = createSelector(
+//   selectLandingDataState,
+//   (landingState: QrViewResponse) => landingState.price
+// );
 
 export const selectPrices = createSelector(
   selectLandingDataState,
-  (landingState: LandingData) => landingState.price
+  (landingState: QrViewResponse) => landingState.price
 );

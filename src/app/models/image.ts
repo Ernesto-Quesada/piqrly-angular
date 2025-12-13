@@ -1,7 +1,10 @@
 export interface Image {
+  id: string; // Unique identifier for the image
   pictureId: string; // Unique identifier for the image
-  url: string; // URL of the image
+  qrCode: string; // QR code associated with the image
+  imageUrl: string; // URL of the image
   description?: string; // Optional description for the image
+  createdAt?: string; // Optional creation date of the image
 }
 export interface Price {
   small: number; // Price for small size

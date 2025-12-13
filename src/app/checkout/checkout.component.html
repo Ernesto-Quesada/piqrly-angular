@@ -1,3 +1,7 @@
+<div *ngIf="cartId" class="alert alert-info mt-3">
+  Checkout for app cart: <strong>{{ cartId }}</strong>
+</div>
+
 <div class="container-fluid d-flex flex-column h-100">
   <div class="card mt-5 mb-4">
     <div class="card-body">
@@ -137,7 +141,7 @@
       <div class="row">
         <div class="col-5">
           <img
-            [src]="image.image.url"
+            [src]="image.image.imageUrl"
             class="checkout-image p-1"
             style="border-radius: 9px"
             alt="..."
@@ -155,4 +159,50 @@
             </div> -->
     </div>
   </ng-container>
+  <ng-container *ngIf="cartId; else qrFlow">
+    <ng-container *ngFor="let item of webCartItems">
+      <div class="card w-100 mb-2">
+        <div class="row">
+          <div class="col-5">
+            <img
+              [src]="item.imageUrl || ''"
+              class="checkout-image p-1"
+              style="border-radius: 9px"
+              alt="..."
+            />
+          </div>
+          <div class="col-7">
+            <div class="card-body">
+              <p class="card-text">{{ item.size }} size</p>
+              <p class="card-text">{{ item.price | currency }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </ng-container>
+
+  <ng-template #qrFlow>
+    <!-- your ORIGINAL QR-based ngFor stays here -->
+    <ng-container *ngFor="let image of selectedImages$ | async">
+      <div class="card w-100 mb-2">
+        <div class="row">
+          <div class="col-5">
+            <img
+              [src]="image.image.imageUrl"
+              class="checkout-image p-1"
+              style="border-radius: 9px"
+              alt="..."
+            />
+          </div>
+          <div class="col-7">
+            <div class="card-body">
+              <p class="card-text">{{ image.size }} size</p>
+              <p class="card-text">{{ image.price | currency }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </ng-template>
 </div>

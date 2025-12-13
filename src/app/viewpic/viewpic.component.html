@@ -1,51 +1,18 @@
-<!-- <img src="./../../assets/images/067A0403.JPG" alt=""> -->
-
-<!-- <div class="container-fluid">
-  <div class="row">
-    <div class="col col-md-10" style="border: 1px solid lightgreen;">
-      <div class="d-flex justify-content-center">
-        <h1>View Pictures</h1>
-      </div>
-      <div class="row">
-        <div class="col align-self-center text-center">
-          <div class="main-image">
-            <img [src]="selectedImage" class="img-fluid" alt="Main Image">
-          </div>           
-        </div>
-      </div>
-      <div class="row">
-        <div class="col align-self-center text-center">
-          <div class="thumbnail-strip d-flex  justify-content-center mt-3">
-            <div *ngFor="let image of images" class="thumbnail">
-              <img [src]="image" [class.active]="image === selectedImage" (click)="selectImage(image)">
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col col-md-2 position-relative" style="border: 1px solid white; background-color: rgb(255, 255, 255);">
-      <div class="d-flex justify-content-center h-100">
-
-        <add-to-cart class="w-100 "></add-to-cart>
-      </div>
-    </div>
-  </div>
-</div> -->
-
 <div class="container-fluid">
   <!-- TODO check if the images are for sale -->
-  <div *ngIf="true" class="row mt-3">
+  <div id="upper_bar" *ngIf="isForSale; else notForSale" class="row mt-3">
     <div class="col text-center my-0">
       <p>BUY IMAGES</p>
     </div>
   </div>
-  <!-- <div class="row">
-      <div class="col">
-        <image-owner [imageCredit]="'Paco Photos'"></image-owner>
+  <ng-template #notForSale>
+    <div class="row mt-3">
+      <div class="col text-center my-0">
+        <p>Images shared with you</p>
       </div>
-    </div> -->
-  <div class="row image-container">
+    </div>
+  </ng-template>
+  <div id="images_diplayer" class="row image-container">
     <!-- Main Section (10 columns on medium+ screens) -->
     <div class="col col-md-10 position-relative d-flex flex-grow-1">
       <!-- LARGE IMAGE STRIP -->
@@ -57,7 +24,11 @@
               class="full-img m-1 position-relative"
               (click)="openImageModal(image)"
             >
-              <img [src]="image.url" class="img-thumbnail" alt="Thumbnail" />
+              <img
+                [src]="image.imageUrl"
+                class="img-thumbnail"
+                alt="Thumbnail"
+              />
               <!-- Overlay to indicate selection -->
               <div>
                 <!-- <div *ngIf="isSelected(image)" class="selection-overlay"> -->
@@ -94,7 +65,11 @@
               class="thumbnail m-1"
               (click)="onThumbnailClick(image, i)"
             >
-              <img [src]="image.url" class="img-thumbnail" alt="Thumbnail" />
+              <img
+                [src]="image.imageUrl"
+                class="img-thumbnail"
+                alt="Thumbnail"
+              />
               <span></span>
               <div
                 *ngIf="isSelected(image.pictureId) | async"
@@ -121,7 +96,7 @@
     </div>
   </div>
 
-  <div class="row">
+  <div id="pick_size_checkout" class="row">
     <div class="col-sm text-center">
       <div class="d-flex justify-content-center h-100">
         <!-- Pass selected images to the child component -->

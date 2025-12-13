@@ -2,13 +2,13 @@ import { Image } from './image';
 
 export interface Cart {
   selectedPictures: Image[];
-  chosenSize: 'small' | 'full' | null;
+  chosenSize: 'small' | 'full' | 'royalty' | null;
   prices: { small: number; full: number };
 }
 
 export interface CheckoutCartPayload {
   images: Image[]; // array of picture IDs or a list of images
-  chosenSize: 'small' | 'full' | null; // The size chosen by the user
+  chosenSize: 'small' | 'full' | 'royalty' | null; // The size chosen by the user
   totalPrice: number;
   user: {
     fullName: string;
@@ -19,7 +19,7 @@ export interface CheckoutCartPayload {
 }
 export interface CartItem {
   image: Image;
-  size: 'small' | 'full' | null;
+  size: 'small' | 'full' | 'royalty' | null;
   price: number;
 }
 export interface ShopCart {

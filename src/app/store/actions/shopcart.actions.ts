@@ -1,6 +1,6 @@
 import { createAction, props } from '@ngrx/store';
 
-import { Image, LandingData } from '..//../models/image';
+import { QrPicture, QrViewResponse } from '..//../models/qr-read-response';
 
 export const checkoutCartStarted = createAction(
   '[ShopCart] Checkout Started' // Payload can be refined based on your BE contract.
@@ -14,7 +14,11 @@ export const setChosenSize = createAction(
 export const addImageToCart = createAction(
   '[ShopCart] Add Picture to ShopCart',
   props<{
-    cartItem: { image: Image; size: 'small' | 'full' | null; price: number };
+    cartItem: {
+      image: QrPicture;
+      size: 'small' | 'full' | 'royalty' | null;
+      price: number;
+    };
   }>()
 );
 // export const imageAddedinThumbnailStrip = createAction(
@@ -50,3 +54,4 @@ export const updateCheckoutForm = createAction(
   '[Checkout] Update Form',
   props<{ formValues: { fullName: string; email: string } }>()
 );
+export const clearShopCart = createAction('[ShopCart] Clear Cart');

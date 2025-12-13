@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { LandingData } from '../../models/image';
+import { QrViewResponse } from '../../models/qr-read-response';
 
 export const landingDataLoad = createAction(
   '[Landing] Load data on first landing',
@@ -8,7 +8,7 @@ export const landingDataLoad = createAction(
 
 export const loadPicturePriceSuccess = createAction(
   '[Landing] Load Picture Price User Success',
-  props<{ response: LandingData }>()
+  props<{ response: QrViewResponse }>()
 );
 export const loadPicturePriceFailure = createAction(
   '[Landing] Load Picture Price User Failure',

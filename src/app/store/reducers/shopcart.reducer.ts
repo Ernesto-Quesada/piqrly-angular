@@ -6,6 +6,7 @@ import { ShopCart } from './..//../models/shopCart';
 import {
   addImageToCart,
   checkoutCartStarted,
+  clearShopCart,
   //loadPicturePriceSuccess,
   //imageAddedinThumbnailStrip,
   removeImageFromCart,
@@ -49,20 +50,11 @@ export const shopCartReducer = createReducer<ShopCart>(
       ...state,
       user: formValues,
     };
-  })
-  // on(loadPicturePriceSuccess, (state, { response }) => ({
-  //   ...state,
-  //   prices: response.price,
-  // }))
-  //  on(checkoutCartSuccess, (state) => ({
-  //     ...state,
-  //     // Clear cart after successful checkout.
-  //     selectedPictures: [],
-  //     prices: { small: 0, full: 0 },
-  //     chosenSize: null
-  //   })),
-  //   on(checkoutCartFailure, (state) => ({
-  //     ...state
-  //     // You could set an error flag if needed.
-  //   }))
+  }),
+  on(clearShopCart, (state) => ({
+    ...state,
+    items: [],
+    subtotalPrice: 0,
+    totalPrice: 0,
+  }))
 );

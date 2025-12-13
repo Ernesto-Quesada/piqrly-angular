@@ -27,7 +27,7 @@
       <div class="row">
         <div class="col-4 text-center">
           <mat-icon class="icon_size">photo_size_select_small</mat-icon>
-          <p class="size_font">SMALL</p>
+          <p class="size_font">Small</p>
         </div>
         <div class="col-8">
           <p class="text-sm-start size-select-info pt-1">
@@ -51,7 +51,7 @@
       <div class="row">
         <div class="col-4 text-center">
           <mat-icon class="icon_size">photo_size_select_large</mat-icon>
-          <p class="size_font">FULL</p>
+          <p class="size_font">Full</p>
         </div>
         <div class="col-8">
           <!-- <p *ngIf="!selectedSize" >Please select a size</p> -->
@@ -71,6 +71,30 @@
       </div>
     </button>
   </mat-card-content>
+  <mat-card-content class="px-0">
+    <button mat-raised-button class="px-3 h-100 pick-size-button">
+      <div class="row">
+        <div class="col-4 text-center">
+          <mat-icon class="icon_size">work</mat-icon>
+          <p class="size_font">Royalty Free</p>
+        </div>
+        <div class="col-8">
+          <p class="text-sm-start size-select-info pt-1">
+            best for businesses and commercial use
+          </p>
+          <div class="row">
+            <div class="col-md-6 text-end">
+              <!-- <ng-container *ngIf="prices$ | async as prices">
+                <span style="font-size: 18px">{{ prices.full | currency }}</span
+                ><span> each</span>
+              </ng-container> -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </button>
+  </mat-card-content>
+
   <mat-card-content class="mt-2">
     <div class="mt-2">
       <p class="text-end">

@@ -14,6 +14,7 @@ import {
 } from '@angular/common/http';
 import { appStoreProviders } from './store/app.store';
 import { NgxStripeModule } from 'ngx-stripe';
+import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -24,9 +25,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideAnimationsAsync(),
     importProvidersFrom(
-      NgxStripeModule.forRoot(
-        'pk_test_51RCXTD4Je26dbkiYQmhsN66oK2Z4LQF2owx1Ybscen0YJnnRV0YuIzCr2HySJHJHE4bGm6BcBXqPuuFIVsnBYLtu00ffGSM70m'
-      )
+      NgxStripeModule.forRoot(environment.stripePublishableKey)
     ),
   ],
 };

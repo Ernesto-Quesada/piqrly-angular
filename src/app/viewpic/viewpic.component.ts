@@ -5,8 +5,8 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { AddToCartComponent } from '../add-to-cart/add-to-cart.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ImageModalComponent } from '../image-modal/image-modal.component';
-import images from './../+ahelper.json/images'; // Assuming you have a JSON file with image data
-import { Image, LandingData } from '../models/image';
+// import images from './../+ahelper.json/images'; // Assuming you have a JSON file with image data
+import { QrPicture, QrViewResponse } from '../models/qr-read-response';
 import { select, Store } from '@ngrx/store';
 import { ShopCart } from '../models/shopCart';
 import {
@@ -37,18 +37,22 @@ export class ViewpicComponent implements OnInit {
   userId!: string;
   qr!: string;
   pictures!: Picture[];
-  images = images; // Use the imported images array, or replace with your service call to fetch images
-
+  // images = images; // Use the imported images array, or replace with your service call to fetch images
+  isForSale: boolean = false;
   isDesktop: boolean = false;
   cartItems$: Observable<
-    { image: Image; size: 'small' | 'full' | null; price: number }[]
+    {
+      image: QrPicture;
+      size: 'small' | 'full' | 'royalty' | null;
+      price: number;
+    }[]
   >;
-  images$: Observable<Image[]> = of([]);
+  images$: Observable<QrPicture[]> = of([]);
   constructor(
     private route: ActivatedRoute,
     private dialog: MatDialog,
     private storeShopCart: Store<{ shopcart: ShopCart }>,
-    private storeLanding: Store<{ landingData: LandingData }>
+    private storeLanding: Store<{ landingData: QrViewResponse }>
   ) {
     this.cartItems$ = this.storeShopCart.pipe(select(selectItems));
 
@@ -76,7 +80,7 @@ export class ViewpicComponent implements OnInit {
   // selectImage(image: string) {
   //   this.selectedImage = image;
   // }
-  toggleSelection(image: Image): void {
+  toggleSelection(image: QrPicture): void {
     // TODO : add image to thumbnail strip
     //  this.store.dispatch(imageAddedinThumbnailStrip({image}));
     // const index = this.selectedImages.indexOf(image);
@@ -99,14 +103,14 @@ export class ViewpicComponent implements OnInit {
       )
     );
   }
-  openImageModal(image: Image): void {
+  openImageModal(image: QrPicture): void {
     this.dialog.open(ImageModalComponent, {
       data: { image },
       width: window.innerWidth < 768 ? '90vw' : '600px',
       backdropClass: 'custom-backdrop',
     });
   }
-  onThumbnailClick(image: Image, index: number): void {
+  onThumbnailClick(image: QrPicture, index: number): void {
     this.cartItems$.pipe(take(1)).subscribe((cartItems) => {
       const exist = cartItems.some(
         (item) => item.image.pictureId === image.pictureId

@@ -1,7 +1,7 @@
-import { LandingData } from './image';
+import { QrViewResponse } from './qr-read-response';
 import { Cart, CheckoutCartPayload, ShopCart } from './shopCart';
 
 export interface AppState {
-  landingData: LandingData;
+  landingData: QrViewResponse;
   shopCart: ShopCart;
 }

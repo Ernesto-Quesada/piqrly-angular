@@ -9,41 +9,49 @@ import { Image } from '../models/image';
 import { MatButtonModule } from '@angular/material/button';
 import { selectPrices } from '../store/selectors/landingData.selector';
 import { take } from 'rxjs';
+import { QrPicture, QrPrice } from '../models/qr-read-response';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'image-modal',
-  imports: [MatCardModule, MatIconModule, MatButtonModule],
+  imports: [MatCardModule, MatIconModule, MatButtonModule, CommonModule],
   standalone: true,
   templateUrl: './image-modal.component.html',
   styleUrl: './image-modal.component.scss',
 })
 export class ImageModalComponent {
-  selectedSize: 'small' | 'full' | null = null;
+  selectedSize: 'small' | 'full' | 'royalty' | null = null;
+  priceData: QrPrice | null = null;
+  forSale: boolean = false;
+
   constructor(
     public dialogRef: MatDialogRef<ImageModalComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { image: Image },
+    @Inject(MAT_DIALOG_DATA) public data: { image: QrPicture },
     private store: Store<{ shopcart: ShopCart }>
-  ) {}
-  // getPrice(): number {
-  //   const prices = { small: 5, full: 10 }; // You can get this from the store instead if needed
-  //   return this.selectedSize ? prices[this.selectedSize] : 0;
-  // }
+  ) {
+    this.store.pipe(select(selectPrices), take(1)).subscribe((priceState) => {
+      if (priceState) {
+        this.forSale = true;
+        this.priceData = priceState;
+      }
+    });
+  }
 
   closeModal(): void {
     this.dialogRef.close();
   }
 
-  chooseSizeAndAdd(size: 'small' | 'full'): void {
-    // Retrieve the global prices from the store
-    this.store.pipe(select(selectPrices), take(1)).subscribe((prices) => {
-      if (!prices) return;
-      const price = size === 'small' ? prices.small : prices.full;
-      console.log('price', price);
-      // Dispatch the new action with the image, size, and associated price:
-      this.store.dispatch(
-        addImageToCart({ cartItem: { image: this.data.image, size, price } })
-      );
-      this.dialogRef.close({ addedToCart: true, image: this.data.image });
-    });
+  chooseSizeAndAdd(size: 'small' | 'full' | 'royalty'): void {
+    if (!this.priceData) return;
+
+    let price = 0;
+    if (size === 'small') price = this.priceData.priceSmall;
+    else if (size === 'full') price = this.priceData.priceFull;
+    else if (size === 'royalty') price = this.priceData.priceRoyalty;
+
+    this.store.dispatch(
+      addImageToCart({ cartItem: { image: this.data.image, size, price } })
+    );
+    this.dialogRef.close({ addedToCart: true, image: this.data.image });
   }
 }

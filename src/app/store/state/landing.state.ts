@@ -1,6 +1,6 @@
-import { LandingData } from '../../models/image';
+import { QrViewResponse } from '../../models/qr-read-response';
 
-export const initialDataState: LandingData = JSON.parse(
+export const initialDataState: QrViewResponse = JSON.parse(
   localStorage.getItem('appState') || '{}'
 )?.landingData ?? {
   pictures: [],

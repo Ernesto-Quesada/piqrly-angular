@@ -26,12 +26,13 @@ import {
   selectSubtotalPrice,
 } from '../store/selectors/shopcart.selector';
 // import { checkoutCartPayload } from '../store/actions/checkout-cart.actions';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CheckoutService } from '../services/checkout.service';
 import { loadStripe } from '@stripe/stripe-js';
 import { StripeService } from 'ngx-stripe';
 import { updateCheckoutForm } from '../store/actions/shopcart.actions';
 import { MatIconModule } from '@angular/material/icon';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-checkout',
@@ -51,12 +52,11 @@ import { MatIconModule } from '@angular/material/icon';
 export class CheckoutComponent implements OnInit {
   checkoutForm: FormGroup;
   checkoutState$: Observable<ShopCart>;
-  stripePromise = loadStripe(
-    'pk_test_51RCXTD4Je26dbkiYQmhsN66oK2Z4LQF2owx1Ybscen0YJnnRV0YuIzCr2HySJHJHE4bGm6BcBXqPuuFIVsnBYLtu00ffGSM70m'
-  );
+  stripePromise = loadStripe(environment.stripePublishableKey);
 
   selectedImages$: Observable<CartItem[]>;
   totalPrice$: Observable<number>;
+  cartId: string | null = null;
   // images: Image[] = [];
   // someImages: any[] = [];
   itemTotals = {
@@ -71,11 +71,13 @@ export class CheckoutComponent implements OnInit {
     itemTotal: 0,
     grandTotal: 0,
   };
+  webCartItems: any[] = []; // 👈 add this
 
   constructor(
     private fb: FormBuilder,
     private store: Store<{ cart: ShopCart }>,
-    private checkoutService: CheckoutService
+    private checkoutService: CheckoutService,
+    private route: ActivatedRoute
   ) {
     // Set up form controls for user details.
     this.checkoutForm = this.fb.group({
@@ -92,6 +94,53 @@ export class CheckoutComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.route.queryParamMap.subscribe((params) => {
+      this.cartId = params.get('cartId');
+      console.log('🛒 Checkout cartId from URL:', this.cartId);
+
+      if (this.cartId) {
+        this.checkoutService.getWebCart(this.cartId).subscribe({
+          next: (cart) => {
+            console.log('🛒 WEB CART DEBUG from API:', cart);
+            this.webCartItems = cart.items || [];
+
+            // 🔹 compute totals from webCartItems
+            const fullItems = this.webCartItems.filter(
+              (i: any) => i.size === 'full'
+            );
+            const smallItems = this.webCartItems.filter(
+              (i: any) => i.size === 'small'
+            );
+
+            this.itemTotals = {
+              fullSizeItems: fullItems.length,
+              fullSizeSubT: fullItems.reduce(
+                (sum: number, i: any) => sum + i.price,
+                0
+              ),
+              fullSizePriceEach: fullItems.length ? fullItems[0].price : 0,
+
+              smallItems: smallItems.length,
+              smallSizeSubT: smallItems.reduce(
+                (sum: number, i: any) => sum + i.price,
+                0
+              ),
+              smallSizePriceEach: smallItems.length ? smallItems[0].price : 0,
+
+              itemTotal: this.webCartItems.length,
+              grandTotal: this.webCartItems.reduce(
+                (sum: number, i: any) => sum + i.price,
+                0
+              ),
+            };
+          },
+          error: (err) => {
+            console.error('❌ WEB CART ERROR:', err);
+          },
+        });
+      }
+    });
+
     // Optionally, you could dispatch an action to re-fetch cart state if needed
     this.checkoutForm.valueChanges.subscribe((value) => {
       this.store.dispatch(updateCheckoutForm({ formValues: value }));
@@ -99,6 +148,9 @@ export class CheckoutComponent implements OnInit {
     this.checkoutState$
       .pipe(
         map((cartState) => {
+          if (this.cartId) {
+            return;
+          }
           const fullItems = cartState.items.filter(
             (item) => item.size === 'full'
           );
@@ -131,6 +183,33 @@ export class CheckoutComponent implements OnInit {
 
   pay(event: Event) {
     event.preventDefault();
+
+    // ✅ 1) APP CART FLOW (Flutter → web): we have ?cartId=...
+    if (this.cartId) {
+      if (this.checkoutForm.invalid) {
+        return;
+      }
+
+      const payload = {
+        cartId: this.cartId,
+        fullName: this.checkoutForm.value.fullName,
+        email: this.checkoutForm.value.email,
+      };
+
+      this.checkoutService
+        .createWebCartCheckoutSession(payload)
+        .subscribe(async (data) => {
+          const sessionId = data.sessionId;
+          console.log('🧾 Web-cart Session ID:', sessionId);
+
+          const stripe = await this.stripePromise;
+          stripe?.redirectToCheckout({ sessionId });
+        });
+
+      return; // ⛔ do not run the old QR flow
+    }
+
+    // ✅ 2) EXISTING QR FLOW (no cartId): keep your old logic
     let payload: any = {};
 
     this.checkoutState$.subscribe((state) => {
@@ -140,7 +219,7 @@ export class CheckoutComponent implements OnInit {
         pictureIds: state.items.map((item) => item.image.pictureId),
       };
     });
-    // TODO MOVE TO SERVICE
+
     this.checkoutService
       .createCheckoutSession(payload)
       .subscribe(async (data) => {

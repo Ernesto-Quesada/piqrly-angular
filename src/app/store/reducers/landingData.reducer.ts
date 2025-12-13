@@ -1,12 +1,12 @@
 import { createReducer, on } from '@ngrx/store';
-import { LandingData } from '../../models/image';
+import { QrViewResponse } from '../../models/qr-read-response';
 import { initialDataState } from '../state/landing.state';
 import {
   landingDataLoad,
   loadPicturePriceSuccess,
 } from '../actions/landingData.actions';
 
-export const landingDataReducer = createReducer<LandingData>(
+export const landingDataReducer = createReducer<QrViewResponse>(
   initialDataState,
 
   on(landingDataLoad, (state, { qr }) => ({
@@ -18,7 +18,7 @@ export const landingDataReducer = createReducer<LandingData>(
     ...state,
     pictures: response.pictures,
     price: response.price,
-    qr: response.qr,
-    user: response.user,
+    forSale: response.forSale,
+    user: response.owner || {}, // Ensure user is defined, fallback to empty object if not present
   }))
 );
