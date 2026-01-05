@@ -32,7 +32,6 @@ export class PictureService {
 
   getPaidPictures(sessionId: string): Observable<any> {
     return this.http.get<any>(API.pictures.paidPictures(sessionId));
-    // return this.http.get<any>(this.apiUrl + 'paid-pictures/' + sessionId);
   }
   // fetchPaidPictures(sessionId: string) {
   //   return this.http.get<{ pictureUrls: string[] }>(

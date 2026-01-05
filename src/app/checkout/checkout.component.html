@@ -6,6 +6,7 @@
   <div class="card mt-5 mb-4">
     <div class="card-body">
       <h6 class="card-title mb-3">Checkout</h6>
+
       <form [formGroup]="checkoutForm" (ngSubmit)="pay($event)">
         <div class="row">
           <div class="col-md-6">
@@ -39,6 +40,7 @@
               </label>
             </div>
           </div>
+
           <div class="row ms-0">
             <div class="col-8">
               <p class="">item total</p>
@@ -85,31 +87,30 @@
               </p>
             </div>
           </div>
+
+          <!-- ✅ Royalty block -->
+          <div class="row ms-0 mb-3" *ngIf="itemTotals.royaltyItems > 0">
+            <div class="col-8">
+              <p class="mb-0 lineh1">
+                royalty pictures
+                <span class="co-font-size">{{ itemTotals.royaltyItems }}</span>
+              </p>
+              <span class="price-each">
+                {{ itemTotals.royaltyPriceEach | currency }}each
+              </span>
+              <span class="price-each bkg-i">commercial use</span>
+            </div>
+            <div class="col-4">
+              <p class="text-end sub-font-size">
+                {{ itemTotals.royaltySubT | currency }}
+              </p>
+            </div>
+          </div>
+
           <p class="total text-end sub-font-size">
             Total: {{ itemTotals.grandTotal | currency }}
           </p>
-          <!-- <div class="col-md-6">
-            <div class="form-floating mb-3">
-              <input
-                type="password"
-                class="form-control"
-                id="tb-pwd"
-                placeholder="Password"
-              />
-              <label for="tb-pwd">Password</label>
-            </div>
-          </div> -->
-          <!-- <div class="col-md-6">
-            <div class="form-floating mb-3">
-              <input
-                type="password"
-                class="form-control"
-                id="tb-cpwd"
-                placeholder="Password"
-              />
-              <label for="tb-cpwd">Confirm Password</label>
-            </div>
-          </div> -->
+
           <div class="col-12">
             <div class="d-md-flex align-items-center">
               <div class="d-grid gap-2 col-8 mx-auto mt-3">
@@ -136,29 +137,7 @@
     </div>
   </div>
 
-  <ng-container *ngFor="let image of selectedImages$ | async">
-    <div class="card w-100 mb-2">
-      <div class="row">
-        <div class="col-5">
-          <img
-            [src]="image.image.imageUrl"
-            class="checkout-image p-1"
-            style="border-radius: 9px"
-            alt="..."
-          />
-        </div>
-        <div class="col-7">
-          <div class="card-body">
-            <p class="card-text">{{ image.size }} size</p>
-            <p class="card-text">{{ image.price | currency }}</p>
-          </div>
-        </div>
-      </div>
-      <!-- <div class="card-body">
-     <span>more data here</span>
-            </div> -->
-    </div>
-  </ng-container>
+  <!-- ✅ ONE rendering path (no duplicates) -->
   <ng-container *ngIf="cartId; else qrFlow">
     <ng-container *ngFor="let item of webCartItems">
       <div class="card w-100 mb-2">
@@ -183,7 +162,6 @@
   </ng-container>
 
   <ng-template #qrFlow>
-    <!-- your ORIGINAL QR-based ngFor stays here -->
     <ng-container *ngFor="let image of selectedImages$ | async">
       <div class="card w-100 mb-2">
         <div class="row">

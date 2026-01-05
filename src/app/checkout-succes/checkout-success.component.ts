@@ -14,6 +14,10 @@ import { PictureService } from '../services/picture.service';
 })
 export class CheckoutSuccessComponent implements OnInit {
   sessionId: string | null = null;
+  loading = true;
+  error: string | null = null;
+
+  paidPictures: { pictureId: string; getUrl: string }[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -23,27 +27,46 @@ export class CheckoutSuccessComponent implements OnInit {
 
   ngOnInit(): void {
     this.sessionId = this.route.snapshot.queryParamMap.get('session_id');
-    console.log('Session ID after chechout:', this.sessionId);
+    console.log('Session ID after checkout:', this.sessionId);
 
-    if (this.sessionId) {
-      this.checkoutService.verifyWebCheckoutSession(this.sessionId).subscribe({
-        next: (res: any) => {
-          console.log('Session verified:', res);
-
-          if (res.paid && res.paymentIntentId) {
-            // IMPORTANT: paid-pictures expects the PaymentIntent/session id you used in DB (paymentIntentId)
-            this.pictureService
-              .getPaidPictures(res.paymentIntentId)
-              .subscribe((data: any) => {
-                console.log('DATA', data);
-              });
-          }
-        },
-        error: (err) => {
-          console.error('VERIFY ERROR', err);
-        },
-      });
+    if (!this.sessionId) {
+      this.loading = false;
+      this.error = 'Missing session_id in URL.';
+      return;
     }
+
+    // ✅ 1) Verify (optional, but good for UI messaging)
+    this.checkoutService.verifyWebCheckoutSession(this.sessionId).subscribe({
+      next: (res: any) => {
+        console.log('Session verified:', res);
+
+        if (!res?.paid) {
+          this.loading = false;
+          this.error = 'Payment not completed yet.';
+          return;
+        }
+
+        // ✅ 2) Fetch paid pictures using the Checkout Session ID (cs_...)
+        // Backend will “sync” PaidPictureAccess if needed (see BE fix below).
+        this.pictureService.getPaidPictures(this.sessionId!).subscribe({
+          next: (data: any) => {
+            this.paidPictures = Array.isArray(data) ? data : [];
+            this.loading = false;
+          },
+          error: (err) => {
+            console.error('PAID PICTURES ERROR', err);
+            this.loading = false;
+            this.error =
+              'Could not load purchased pictures. Please refresh in a few seconds.';
+          },
+        });
+      },
+      error: (err) => {
+        console.error('VERIFY ERROR', err);
+        this.loading = false;
+        this.error = 'Could not verify checkout session.';
+      },
+    });
   }
 }
 
@@ -71,22 +94,31 @@ export class CheckoutSuccessComponent implements OnInit {
 //   ) {}
 
 //   ngOnInit(): void {
+//     // Stripe Checkout sends: ?session_id=cs_test_...
 //     this.sessionId = this.route.snapshot.queryParamMap.get('session_id');
 //     console.log('Session ID after chechout:', this.sessionId);
-//     // Optionally, call your backend to verify session details.
-//     if (this.sessionId) {
-//       this.checkoutService
-//         .verifyCheckoutSession(this.sessionId)
-//         .subscribe((res: any) => {
-//           console.log('Session verified:', res);
-//           if (res.paid && this.sessionId) {
-//             this.pictureService
-//               .getPaidPictures(this.sessionId)
-//               .subscribe((data: any) => {
-//                 console.log('DATA', data); // assuming backend returns pre-signed URLs
-//               });
-//           }
-//         });
-//     }
+
+//     if (!this.sessionId) return;
+
+//     this.checkoutService.verifyWebCheckoutSession(this.sessionId).subscribe({
+//       next: (res: any) => {
+//         console.log('Session verified:', res);
+
+//         // ✅ Your BE paid-pictures endpoint expects the Checkout Session ID (cs_...)
+//         if (res.paid) {
+//           this.pictureService.getPaidPictures(this.sessionId!).subscribe({
+//             next: (data: any) => {
+//               console.log('DATA', data);
+//             },
+//             error: (err) => {
+//               console.error('PAID PICTURES ERROR', err);
+//             },
+//           });
+//         }
+//       },
+//       error: (err) => {
+//         console.error('VERIFY ERROR', err);
+//       },
+//     });
 //   }
 // }

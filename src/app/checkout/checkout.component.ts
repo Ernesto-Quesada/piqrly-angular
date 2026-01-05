@@ -11,25 +11,17 @@ import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { Store, select } from '@ngrx/store';
-import { combineLatest, map, Observable } from 'rxjs';
-import {
-  Cart,
-  CartItem,
-  CheckoutCartPayload,
-  ShopCart,
-} from '../models/shopCart';
-import { Image } from '../models/image';
+import { map, Observable, take } from 'rxjs';
+import { CartItem, ShopCart } from '../models/shopCart';
 
 import {
   selectSelectedPictures,
   selectShopCartState,
   selectSubtotalPrice,
 } from '../store/selectors/shopcart.selector';
-// import { checkoutCartPayload } from '../store/actions/checkout-cart.actions';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CheckoutService } from '../services/checkout.service';
 import { loadStripe } from '@stripe/stripe-js';
-import { StripeService } from 'ngx-stripe';
 import { updateCheckoutForm } from '../store/actions/shopcart.actions';
 import { MatIconModule } from '@angular/material/icon';
 import { environment } from '../../environments/environment';
@@ -57,8 +49,7 @@ export class CheckoutComponent implements OnInit {
   selectedImages$: Observable<CartItem[]>;
   totalPrice$: Observable<number>;
   cartId: string | null = null;
-  // images: Image[] = [];
-  // someImages: any[] = [];
+
   itemTotals = {
     fullSizeItems: 0,
     fullSizeSubT: 0,
@@ -68,10 +59,15 @@ export class CheckoutComponent implements OnInit {
     smallSizeSubT: 0,
     smallSizePriceEach: 0,
 
+    royaltyItems: 0,
+    royaltySubT: 0,
+    royaltyPriceEach: 0,
+
     itemTotal: 0,
     grandTotal: 0,
   };
-  webCartItems: any[] = []; // 👈 add this
+
+  webCartItems: any[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -79,21 +75,18 @@ export class CheckoutComponent implements OnInit {
     private checkoutService: CheckoutService,
     private route: ActivatedRoute
   ) {
-    // Set up form controls for user details.
     this.checkoutForm = this.fb.group({
       fullName: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      // address: ['', Validators.required],
-      // Additional fields as needed.
     });
 
-    // Select data from the store.
     this.selectedImages$ = this.store.pipe(select(selectSelectedPictures));
     this.totalPrice$ = this.store.pipe(select(selectSubtotalPrice));
     this.checkoutState$ = this.store.pipe(select(selectShopCartState));
   }
 
   ngOnInit(): void {
+    // 1) cartId mode (Flutter -> Web cart)
     this.route.queryParamMap.subscribe((params) => {
       this.cartId = params.get('cartId');
       console.log('🛒 Checkout cartId from URL:', this.cartId);
@@ -104,12 +97,15 @@ export class CheckoutComponent implements OnInit {
             console.log('🛒 WEB CART DEBUG from API:', cart);
             this.webCartItems = cart.items || [];
 
-            // 🔹 compute totals from webCartItems
+            // compute totals from webCartItems
             const fullItems = this.webCartItems.filter(
               (i: any) => i.size === 'full'
             );
             const smallItems = this.webCartItems.filter(
               (i: any) => i.size === 'small'
+            );
+            const royaltyItems = this.webCartItems.filter(
+              (i: any) => i.size === 'royalty'
             );
 
             this.itemTotals = {
@@ -127,6 +123,13 @@ export class CheckoutComponent implements OnInit {
               ),
               smallSizePriceEach: smallItems.length ? smallItems[0].price : 0,
 
+              royaltyItems: royaltyItems.length,
+              royaltySubT: royaltyItems.reduce(
+                (sum: number, i: any) => sum + i.price,
+                0
+              ),
+              royaltyPriceEach: royaltyItems.length ? royaltyItems[0].price : 0,
+
               itemTotal: this.webCartItems.length,
               grandTotal: this.webCartItems.reduce(
                 (sum: number, i: any) => sum + i.price,
@@ -141,38 +144,49 @@ export class CheckoutComponent implements OnInit {
       }
     });
 
-    // Optionally, you could dispatch an action to re-fetch cart state if needed
+    // keep store form in sync
     this.checkoutForm.valueChanges.subscribe((value) => {
       this.store.dispatch(updateCheckoutForm({ formValues: value }));
     });
+
+    // 2) QR flow totals (ONLY when cartId is not present)
     this.checkoutState$
       .pipe(
         map((cartState) => {
-          if (this.cartId) {
-            return;
-          }
-          const fullItems = cartState.items.filter(
-            (item) => item.size === 'full'
-          );
-          const smallItems = cartState.items.filter(
-            (item) => item.size === 'small'
+          if (this.cartId) return; // cart mode totals handled above
+
+          const fullItems = cartState.items.filter((i) => i.size === 'full');
+          const smallItems = cartState.items.filter((i) => i.size === 'small');
+          const royaltyItems = cartState.items.filter(
+            (i) => i.size === 'royalty'
           );
 
+          // ✅ IMPORTANT: use cartState.items here (NOT webCartItems)
           this.itemTotals = {
-            fullSizeItems: fullItems.length ? fullItems.length : 0,
-            fullSizeSubT: fullItems.reduce((sum, item) => sum + item.price, 0),
-            fullSizePriceEach: fullItems.length > 0 ? fullItems[0].price : 0,
-
-            smallItems: smallItems.length ? smallItems.length : 0,
-            smallSizeSubT: smallItems.reduce(
-              (sum, item) => sum + item.price,
+            fullSizeItems: fullItems.length,
+            fullSizeSubT: fullItems.reduce(
+              (sum: number, i: any) => sum + i.price,
               0
             ),
-            smallSizePriceEach: smallItems.length > 0 ? smallItems[0].price : 0,
-            itemTotal: cartState.items.length,
+            fullSizePriceEach: fullItems.length ? fullItems[0].price : 0,
 
+            smallItems: smallItems.length,
+            smallSizeSubT: smallItems.reduce(
+              (sum: number, i: any) => sum + i.price,
+              0
+            ),
+            smallSizePriceEach: smallItems.length ? smallItems[0].price : 0,
+
+            royaltyItems: royaltyItems.length,
+            royaltySubT: royaltyItems.reduce(
+              (sum: number, i: any) => sum + i.price,
+              0
+            ),
+            royaltyPriceEach: royaltyItems.length ? royaltyItems[0].price : 0,
+
+            itemTotal: cartState.items.length,
             grandTotal: cartState.items.reduce(
-              (sum, item) => sum + item.price,
+              (sum: number, i: any) => sum + i.price,
               0
             ),
           };
@@ -186,9 +200,7 @@ export class CheckoutComponent implements OnInit {
 
     // ✅ 1) APP CART FLOW (Flutter → web): we have ?cartId=...
     if (this.cartId) {
-      if (this.checkoutForm.invalid) {
-        return;
-      }
+      if (this.checkoutForm.invalid) return;
 
       const payload = {
         cartId: this.cartId,
@@ -206,29 +218,23 @@ export class CheckoutComponent implements OnInit {
           stripe?.redirectToCheckout({ sessionId });
         });
 
-      return; // ⛔ do not run the old QR flow
+      return;
     }
 
-    // ✅ 2) EXISTING QR FLOW (no cartId): keep your old logic
-    let payload: any = {};
-
-    this.checkoutState$.subscribe((state) => {
-      payload = {
+    // ✅ 2) QR FLOW
+    this.checkoutState$.pipe(take(1)).subscribe((state) => {
+      const payload = {
         totalAmount: state.subtotalPrice * 100,
         user: state.user,
         pictureIds: state.items.map((item) => item.image.pictureId),
       };
-    });
 
-    this.checkoutService
-      .createCheckoutSession(payload)
-      .subscribe(async (data) => {
-        const sessionId = data.sessionId;
-        console.log('Session ID in checkout:', sessionId);
-        const stripe = await this.stripePromise;
-        stripe?.redirectToCheckout({
-          sessionId: data.sessionId,
+      this.checkoutService
+        .createCheckoutSession(payload)
+        .subscribe(async (data) => {
+          const stripe = await this.stripePromise;
+          stripe?.redirectToCheckout({ sessionId: data.sessionId });
         });
-      });
+    });
   }
 }
