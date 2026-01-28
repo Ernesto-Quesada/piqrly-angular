@@ -1,4 +1,4 @@
-import { Image } from './image';
+import { Image } from './response';
 
 export interface Cart {
   selectedPictures: Image[];

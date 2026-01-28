@@ -1,25 +1,27 @@
-<!-- Top fixed icons over the backdrop -->
+<!-- Top fixed icons -->
 <div class="dialog-top-icons">
   <button mat-icon-button (click)="closeModal()" class="back-button">
     <mat-icon class="back-button-icon">arrow_back</mat-icon>
   </button>
 </div>
 
-<!-- Centered modal content with the IMAGE -->
+<!-- ✅ Swipe strip -->
 <div class="modal-content">
-  <mat-card class="modal-card">
-    <img [src]="data.image.imageUrl" class="full-image" alt="Full Image" />
-  </mat-card>
+  <div class="swipe-strip" #strip>
+    <div class="slide" *ngFor="let img of images">
+      <mat-card class="modal-card">
+        <img [src]="img.previewImageUrl" class="full-image" alt="Image" />
+      </mat-card>
+    </div>
+  </div>
 </div>
 
-<!-- Bottom fixed icons over the backdrop -->
+<!-- Bottom fixed icons -->
 <div class="dialog-bottom-icons">
-  <!-- Comment icon -->
   <button mat-icon-button>
     <mat-icon class="modal-bottom-icon">chat_bubble_outline</mat-icon>
   </button>
 
-  <!-- Conditional price buttons -->
   <ng-container *ngIf="forSale && priceData">
     <button
       *ngIf="priceData.priceSmall"
@@ -27,9 +29,7 @@
       (click)="chooseSizeAndAdd('small')"
       class="check-button"
     >
-      Add Small ({{
-        priceData.priceSmall | currency : "USD" : "symbol" : "1.0-0"
-      }})
+      Small ({{ priceData.priceSmall | currency: "USD" : "symbol" : "1.0-0" }})
     </button>
 
     <button
@@ -38,7 +38,7 @@
       (click)="chooseSizeAndAdd('full')"
       class="check-button"
     >
-      Full ({{ priceData.priceFull | currency : "USD" : "symbol" : "1.0-0" }})
+      Full ({{ priceData.priceFull | currency: "USD" : "symbol" : "1.0-0" }})
     </button>
 
     <button
@@ -47,13 +47,12 @@
       (click)="chooseSizeAndAdd('royalty')"
       class="check-button"
     >
-      Add Royalty ({{
-        priceData.priceRoyalty | currency : "USD" : "symbol" : "1.0-0"
+      Royalty ({{
+        priceData.priceRoyalty | currency: "USD" : "symbol" : "1.0-0"
       }})
     </button>
   </ng-container>
 
-  <!-- Like icon -->
   <button mat-icon-button>
     <mat-icon class="modal-bottom-icon">favorite_border</mat-icon>
   </button>

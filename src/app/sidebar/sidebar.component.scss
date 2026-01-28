@@ -1,40 +1,129 @@
 @use '@angular/material' as mat;
-.sidebar1 {
-    height: 100%;
+
+:host {
+  height: 100%;
+  display: block;
+
+  --bg: #f6f8fc;
+  --text: #0f172a;
+  --muted: #64748b;
+  --blue: #2563eb;
+  --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
 }
 
-  mat-sidenav {
-    width: 300px;
-    max-width: 300px;
-    background-color: #f0f4f9 ;
-   
-  }
-  mat-sidenav-container {
-   overflow-y: visible;
-  }
+/* CONTAINER */
+.shell-container {
+  background: var(--bg);
+}
 
-  .mat-sidenav {
-    border-radius: 0; /* Remove border-radius */
-    background-color: #f0f4f9 ;
-  }
-  .sidenav-footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%; /* Full width for the footer */
-  }
-  ::ng-deep mat-list-item > .mdc-list-item__content > span{
-    display: flex ;
-    justify-content: flex-start;
-    align-items: center;
-  }
-  .mat-drawer-content {
-    display: inline;
-  }
-  .shopping-cart {
-    right: 1rem
-  }
-  ::ng-deep .mat-badge-content{
-    background-color: #ffcd0e !important ;
-    color:#303030!important ;
-    font-size: 0.9rem!important ;
-  }
+/* SIDEBAR */
+.shell-sidenav {
+  width: 300px;
+  max-width: 300px;
+  background: var(--bg);
+  border-right: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+/* SIDEBAR HEADER (mobile only) */
+.sidenav-header {
+  padding: 16px 12px 8px;
+}
+
+/* BRAND */
+.brand,
+.brand-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-mark {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--blue);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  box-shadow: var(--shadow);
+}
+
+.brand-title {
+  font-weight: 900;
+  color: var(--text);
+  font-size: 1.3rem;
+}
+
+.brand-subtitle {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* NAV */
+.nav {
+  padding-top: 6px;
+}
+
+.nav-item {
+  border-radius: 14px;
+  margin: 6px 10px;
+}
+
+::ng-deep .nav-item .mdc-list-item__primary-text {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* FOOTER */
+.sidenav-footer {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+}
+
+.footer-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.04);
+  color: var(--text);
+}
+
+/* CONTENT */
+.shell-content {
+  background: var(--bg);
+}
+
+.page {
+  padding: 16px;
+}
+
+/* GLOBAL HEADER */
+.app-header {
+  padding: 10px 12px;
+}
+
+.app-header .row {
+  min-height: 52px;
+}
+
+/* ICON BUTTON (INLINE, NOT FLOATING) */
+.icon-bubble {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border-radius: 50%;
+  background: var(--blue);
+  box-shadow: var(--shadow);
+}
+
+::ng-deep .icon-bubble .mat-icon,
+::ng-deep .icon-bubble .material-icons,
+::ng-deep .icon-bubble .material-icons-outlined {
+  color: #fff !important;
+}

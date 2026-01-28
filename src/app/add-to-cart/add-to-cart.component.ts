@@ -13,7 +13,7 @@ import { ShopCart } from './../models/shopCart';
 //   selectPrices,
 //   selectSelectedPictures,
 // } from '../store/selectors/cart.selector';
-import { Image } from '../models/image';
+import { Image } from '../models/response';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
 // import {

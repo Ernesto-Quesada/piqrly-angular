@@ -1,0 +1,181 @@
+<div class="qr-page container-fluid px-0">
+  <!-- PAGE HEADER -->
+  <div class="row align-items-center gx-2 page-head">
+    <div class="col-12 col-md">
+      <div class="title">{{ eventName }}</div>
+      <div class="subtitle" *ngIf="ownerLabel">By {{ ownerLabel }}</div>
+    </div>
+  </div>
+  <p>for venta{{ forSale }}</p>
+  <ng-container *ngIf="forSale">
+    <div class="row align-items-center gx-2 page-head">
+      <div class="col-12 col-md">
+        <span class="hint-muted">These photos are for sale.</span>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="row mb-1">
+      <div class="col">
+        <div class="hero-hint">
+          <ng-container *ngIf="selectMode; else notSelectMode">
+            <ng-container *ngIf="forSale; else selectFree">
+              Select size and tap photos to add/remove from cart.
+            </ng-container>
+            <ng-template #selectFree> Tap photos to select. </ng-template>
+          </ng-container>
+
+          <ng-template #notSelectMode>
+            <ng-container *ngIf="forSale; else freeFlow">
+              <span class="hint-muted">
+                Use Select to add to your cart or tap on a picture
+              </span>
+            </ng-container>
+
+            <ng-template #freeFlow>
+              <span class="hint-strong"
+                >Free previews now. Download available.</span
+              >
+            </ng-template>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-2">
+      <div class="col-12 col-md-auto" *ngIf="forSale">
+        <button
+          mat-stroked-button
+          class="btn-pill btn-secondary w-100"
+          (click)="onSelectOrClear()"
+        >
+          <mat-icon>
+            {{ selectedCount > 0 ? "delete_outline" : "check_circle" }}
+          </mat-icon>
+          {{ selectedCount > 0 ? "Clear selection" : "Select" }}
+        </button>
+      </div>
+    </div>
+
+    <!-- ✅ Size selector only when forSale -->
+    <div class="row mt-2" *ngIf="forSale && prices">
+      <div class="col-12">
+        <div class="d-flex flex-wrap gap-1">
+          <button
+            mat-stroked-button
+            class="btn-pill w-auto"
+            (click)="setSize('small')"
+            [class.active-pill]="selectedSize === 'small'"
+          >
+            Small
+            <span class="ms-1 price-chip">{{
+              prices.priceSmall | currency
+            }}</span>
+          </button>
+
+          <button
+            mat-stroked-button
+            class="btn-pill w-auto"
+            (click)="setSize('full')"
+            [class.active-pill]="selectedSize === 'full'"
+          >
+            Full
+            <span class="ms-1 price-chip">{{
+              prices.priceFull | currency
+            }}</span>
+          </button>
+
+          <button
+            mat-stroked-button
+            class="btn-pill w-auto"
+            (click)="setSize('royalty')"
+            [class.active-pill]="selectedSize === 'royalty'"
+          >
+            Royalty
+            <span class="ms-1 price-chip">{{
+              prices.priceRoyalty | currency
+            }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMAGE GRID -->
+  <div class="grid" *ngIf="images?.length">
+    <button
+      class="img-card mat-elevation-z2"
+      *ngFor="let img of images; let i = index"
+      (click)="openPreview(img, i)"
+      type="button"
+    >
+      <img [src]="img.previewImageUrl" alt="preview" />
+
+      <div class="img-overlay" *ngIf="(selectMode$ | async) === true">
+        <div class="d-flex align-items-center gap-2">
+          <mat-icon class="check size" *ngIf="isInCart(img.pictureId)">
+            check_circle
+          </mat-icon>
+          <mat-icon class="check muted" *ngIf="!isInCart(img.pictureId)">
+            radio_button_unchecked
+          </mat-icon>
+
+          <span class="size-badge" *ngIf="isInCart(img.pictureId)">
+            {{ cartSizeLabel(img.pictureId) }}
+          </span>
+        </div>
+      </div>
+    </button>
+  </div>
+
+  <!-- STICKY FOOTER -->
+  <div class="sticky">
+    <div class="sticky-info">
+      <div class="sticky-title">
+        {{
+          selectMode
+            ? selectedCount + " in cart"
+            : forSale
+              ? "For sale"
+              : "Free download"
+        }}
+      </div>
+
+      <div class="sticky-sub">
+        {{
+          selectMode
+            ? forSale
+              ? "Tap photos to add/remove"
+              : "Tap photos to select"
+            : forSale
+              ? "High-res purchase available"
+              : "A zip file with pics will be downloaded"
+        }}
+      </div>
+    </div>
+
+    <!-- Free flow -->
+    <button
+      *ngIf="forSale === false"
+      mat-raised-button
+      class="btn-primary small"
+      (click)="downloadSelected()"
+      [disabled]="selectMode && selectedCount === 0"
+    >
+      Download {{ selectMode ? "(" + selectedCount + ")" : "" }}
+    </button>
+
+    <!-- Sale flow -->
+    <button
+      *ngIf="forSale === true"
+      mat-raised-button
+      class="btn-primary small"
+      (click)="goToCheckout()"
+      [disabled]="selectMode && selectedCount === 0"
+    >
+      Checkout {{ selectMode ? "(" + selectedCount + ")" : "" }}
+    </button>
+  </div>
+</div>

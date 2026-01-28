@@ -6,15 +6,30 @@ export const selectLandingDataState =
 
 export const selectLandingPictures = createSelector(
   selectLandingDataState,
-  (landingState: QrViewResponse) => landingState.pictures
+  (s) => s.pictures,
 );
-
-// export const selectLandingPricesforImage = createSelector(
-//   selectLandingDataState,
-//   (landingState: QrViewResponse) => landingState.price
-// );
 
 export const selectPrices = createSelector(
   selectLandingDataState,
-  (landingState: QrViewResponse) => landingState.price
+  (s) => s.price,
+);
+
+export const selectOwner = createSelector(
+  selectLandingDataState,
+  (s) => s.owner,
+);
+
+export const selectForSale = createSelector(
+  selectLandingDataState,
+  (s) => s.forSale,
+);
+
+// ✅ NEW: event header selectors
+export const selectEventName = createSelector(
+  selectLandingDataState,
+  (s) => s.eventName ?? null,
+);
+
+export const selectIsPublic = createSelector(selectLandingDataState, (s) =>
+  typeof s.isPublic === 'boolean' ? s.isPublic : null,
 );

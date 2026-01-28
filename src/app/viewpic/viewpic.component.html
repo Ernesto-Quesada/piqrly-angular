@@ -1,107 +1,293 @@
-<div class="container-fluid">
-  <!-- TODO check if the images are for sale -->
-  <div id="upper_bar" *ngIf="isForSale; else notForSale" class="row mt-3">
-    <div class="col text-center my-0">
-      <p>BUY IMAGES</p>
+<!-- viewpic.component.html -->
+<div class="qr-page container-fluid px-0">
+  <!-- TOP HEADER (does NOT depend on owner/forSale) -->
+  <div class="top-card">
+    <div class="top-row">
+      <div class="top-left">
+        <!-- Title -->
+        <div class="top-title">
+          <ng-container *ngIf="inviteCode; else qrTitle">
+            {{ (eventName ?? "").trim() || "Event Photos" }}
+          </ng-container>
+
+          <ng-template #qrTitle>
+            <ng-container *ngIf="forSale$ | async as forSale">
+              {{ forSale ? "Photos for Sale" : "Your Photos" }}
+            </ng-container>
+          </ng-template>
+        </div>
+
+        <!-- PRIVATE EVENT BLOCK (works even if owner is null) -->
+        <div class="private-block" *ngIf="(isPrivateEvent$ | async) === true">
+          <div class="top-hint warn">
+            This event is private. Please login or create an account to
+            continue.
+          </div>
+
+          <button
+            mat-raised-button
+            class="btn-primary small"
+            type="button"
+            (click)="goToLogin()"
+          >
+            Login / Create account
+          </button>
+        </div>
+
+        <!-- NORMAL HEADER CONTENT (only when NOT private) -->
+        <ng-container *ngIf="(isPrivateEvent$ | async) === false">
+          <!-- Creator (only if owner exists) -->
+          <ng-container *ngIf="owner$ | async as owner">
+            <div class="top-sub">
+              <span class="label">Creator</span>
+              <span class="value">
+                {{ owner.firstName || "" }} {{ owner.lastName || "" }}
+              </span>
+            </div>
+
+            <!-- Contact ONLY when free -->
+            <ng-container *ngIf="forSale$ | async as forSale">
+              <div class="top-sub contact" *ngIf="!forSale">
+                <span *ngIf="owner.email" class="contact-item">
+                  <mat-icon class="mini">mail</mat-icon>
+                  {{ owner.email }}
+                </span>
+
+                <span *ngIf="owner.phone" class="contact-item">
+                  <mat-icon class="mini">call</mat-icon>
+                  {{ owner.phone }}
+                </span>
+              </div>
+
+              <!-- ✅ Hint: hide "download available" when locked (but still allow previews) -->
+              <div class="top-hint">
+                {{
+                  forSale
+                    ? "These photos are for sale."
+                    : downloadLocked
+                      ? "You can preview photos. Login to download."
+                      : "Free previews now. Download available."
+                }}
+              </div>
+            </ng-container>
+          </ng-container>
+
+          <!-- If owner is null but not private: still show a hint (optional but avoids empty feel) -->
+          <ng-container *ngIf="!(owner$ | async)">
+            <div class="top-hint" *ngIf="!(forSale$ | async)">
+              {{
+                downloadLocked
+                  ? "You can preview photos. Login to download."
+                  : "Free previews now. Download available."
+              }}
+            </div>
+          </ng-container>
+        </ng-container>
+      </div>
+
+      <!-- Avatar (only when owner exists and not private) -->
+      <div class="top-right" *ngIf="(isPrivateEvent$ | async) === false">
+        <ng-container *ngIf="owner$ | async as owner">
+          <div class="mini-avatar" *ngIf="!owner.profilePic">
+            <mat-icon>person</mat-icon>
+          </div>
+
+          <img
+            *ngIf="owner.profilePic"
+            class="mini-avatar-img"
+            [src]="owner.profilePic"
+            alt="Creator avatar"
+          />
+        </ng-container>
+      </div>
     </div>
   </div>
-  <ng-template #notForSale>
-    <div class="row mt-3">
-      <div class="col text-center my-0">
-        <p>Images shared with you</p>
-      </div>
-    </div>
-  </ng-template>
-  <div id="images_diplayer" class="row image-container">
-    <!-- Main Section (10 columns on medium+ screens) -->
-    <div class="col col-md-10 position-relative d-flex flex-grow-1">
-      <!-- LARGE IMAGE STRIP -->
-      <div class="row w-100 position-absolute full-img-wrap">
-        <div class="col text-center">
-          <div class="thumbnail-strip d-flex justify-content-start">
-            <div
-              *ngFor="let image of images$ | async"
-              class="full-img m-1 position-relative"
-              (click)="openImageModal(image)"
-            >
-              <img
-                [src]="image.imageUrl"
-                class="img-thumbnail"
-                alt="Thumbnail"
-              />
-              <!-- Overlay to indicate selection -->
-              <div>
-                <!-- <div *ngIf="isSelected(image)" class="selection-overlay"> -->
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Thumbnail strip with selection functionality -->
-      <div class="row position-absolute w-100 thumbnail-wrap">
-        <!-- <div *ngIf="true" class="row">
-            <div class="col text-center">
-              <p  class="mb-2">PICK UR PICS</p>
-            </div>
-          </div> -->
-        <div class="col text-center">
-          <!-- TODO add below to inform about choosing pics -->
-          <!-- <p  class="mb-0">PICK UR PICS</p> -->
-          <!-- TODO DO NOT DELETE -->
-          <!-- <div class="thumbnail-strip d-flex justify-content-start">
-              <div *ngFor="let image of images" class="thumbnail m-1" 
-                   [class.selected]="isSelected(image.url)"
-                   (click)="toggleSelection(image)">
-                <img [src]="image.url" class="img-thumbnail" alt="Thumbnail">
-                <div *ngIf="isSelected(image.url)" class="selection-overlay">
-                  <span>&#10003;</span>
-                </div>
-              </div>
-            </div> -->
-          <div class="thumbnail-strip d-flex justify-content-start">
-            <div
-              *ngFor="let image of images$ | async; let i = index"
-              class="thumbnail m-1"
-              (click)="onThumbnailClick(image, i)"
-            >
-              <img
-                [src]="image.imageUrl"
-                class="img-thumbnail"
-                alt="Thumbnail"
-              />
-              <span></span>
-              <div
-                *ngIf="isSelected(image.pictureId) | async"
-                class="selection-overlay"
-              >
-                <span>&#10003;</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <!-- DOWNLOAD LOCKED (free download already used) -->
+  <div class="private-block" *ngIf="downloadLocked">
+    <div class="top-hint warn">{{ downloadLockedMsg }}</div>
 
-    <!-- Add-to-cart Section (2 columns on medium+ screens) -->
-    <div
-      *ngIf="isDesktop"
-      class="col-md-2 d-none d-md-block position-relative"
-      style="border: 1px solid white; background-color: #fff"
+    <button
+      mat-raised-button
+      class="btn-primary small"
+      type="button"
+      (click)="goToLogin()"
     >
-      <div class="d-flex justify-content-center h-100">
-        <!-- Pass selected images to the child component -->
-        <add-to-cart></add-to-cart>
-      </div>
-    </div>
+      Login / Create account
+    </button>
   </div>
 
-  <div id="pick_size_checkout" class="row">
-    <div class="col-sm text-center">
-      <div class="d-flex justify-content-center h-100">
-        <!-- Pass selected images to the child component -->
-        <add-to-cart class="w-100"></add-to-cart>
+  <!-- Everything below hidden when private -->
+  <ng-container *ngIf="(isPrivateEvent$ | async) === false">
+    <!-- HERO / ACTION PANEL -->
+    <div class="hero" *ngIf="(forSale$ | async) || !downloadLocked">
+      <div class="row mb-1">
+        <div class="col">
+          <div class="hero-hint">
+            <ng-container *ngIf="selectMode; else notSelectMode">
+              <ng-container *ngIf="forSale$ | async; else selectFree">
+                Select size and tap photos to add/remove from cart.
+              </ng-container>
+              <ng-template #selectFree>
+                Tap photos to select for download.
+              </ng-template>
+            </ng-container>
+
+            <ng-template #notSelectMode>
+              <ng-container *ngIf="forSale$ | async; else freeFlow">
+                <span class="hint-muted">
+                  Use Select to add to your cart or tap on a picture
+                </span>
+              </ng-container>
+
+              <ng-template #freeFlow>
+                <span class="hint-strong"
+                  >Free previews now. Download available.</span
+                >
+              </ng-template>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-2">
+        <!-- ✅ Select button shown for BOTH paid and free (unless locked) -->
+        <div class="col-12 col-md-auto">
+          <button
+            mat-stroked-button
+            class="btn-pill btn-secondary w-100"
+            (click)="onSelectOrClear()"
+          >
+            <mat-icon>
+              {{ selectedCount > 0 ? "delete_outline" : "check_circle" }}
+            </mat-icon>
+            {{ selectedCount > 0 ? "Clear selection" : "Select" }}
+          </button>
+        </div>
+      </div>
+
+      <!-- ✅ Size pills only for paid -->
+      <div class="row mt-2" *ngIf="forSale$ | async">
+        <div class="col-12">
+          <div class="d-flex flex-wrap gap-1">
+            <button
+              mat-stroked-button
+              class="btn-pill w-auto"
+              (click)="setSize('small')"
+              [class.active-pill]="selectedSize === 'small'"
+            >
+              Small
+              <span class="ms-1 price-chip" *ngIf="prices$ | async as p">
+                {{ p.priceSmall | currency }}
+              </span>
+            </button>
+
+            <button
+              mat-stroked-button
+              class="btn-pill w-auto"
+              (click)="setSize('full')"
+              [class.active-pill]="selectedSize === 'full'"
+            >
+              Full
+              <span class="ms-1 price-chip" *ngIf="prices$ | async as p">
+                {{ p.priceFull | currency }}
+              </span>
+            </button>
+
+            <button
+              mat-stroked-button
+              class="btn-pill w-auto"
+              (click)="setSize('royalty')"
+              [class.active-pill]="selectedSize === 'royalty'"
+            >
+              Royalty
+              <span class="ms-1 price-chip" *ngIf="prices$ | async as p">
+                {{ p.priceRoyalty | currency }}
+              </span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
+
+    <div *ngIf="images$ | async as images" class="subtitle p-2">
+      Scan complete • Tap to view
+    </div>
+
+    <!-- GRID ALWAYS STAYS -->
+    <div class="grid" *ngIf="images$ | async as images">
+      <button
+        class="img-card mat-elevation-z2"
+        *ngFor="let img of images"
+        (click)="openPreview(img)"
+        type="button"
+      >
+        <img [src]="img.previewImageUrl" alt="preview" />
+
+        <div class="img-overlay" *ngIf="selectMode$ | async">
+          <div class="d-flex align-items-center gap-2">
+            <mat-icon class="check size" *ngIf="isInCart(img.pictureId)">
+              check_circle
+            </mat-icon>
+            <mat-icon class="check muted" *ngIf="!isInCart(img.pictureId)">
+              radio_button_unchecked
+            </mat-icon>
+
+            <span class="size-badge" *ngIf="isInCart(img.pictureId)">
+              {{ cartSizeLabel(img.pictureId) }}
+            </span>
+          </div>
+        </div>
+      </button>
+    </div>
+
+    <!-- STICKY ALWAYS FOR PAID; FOR FREE only if NOT locked -->
+    <div class="sticky" *ngIf="(forSale$ | async) || !downloadLocked">
+      <div class="sticky-info">
+        <div class="sticky-title">
+          {{
+            selectMode
+              ? selectedCount + " selected"
+              : (forSale$ | async)
+                ? "For sale"
+                : "Free download"
+          }}
+        </div>
+
+        <div class="sticky-sub">
+          {{
+            selectMode
+              ? (forSale$ | async)
+                ? "Tap photos to add/remove"
+                : "Tap photos to select"
+              : (forSale$ | async)
+                ? "High-res purchase available"
+                : "A zip file with pics will be downloaded"
+          }}
+        </div>
+      </div>
+
+      <!-- FREE Download button ONLY if not locked -->
+      <button
+        *ngIf="!(forSale$ | async) && !downloadLocked"
+        mat-raised-button
+        class="btn-primary small"
+        (click)="downloadSelected()"
+        [disabled]="selectMode && selectedCount === 0"
+      >
+        Download {{ selectMode ? "(" + selectedCount + ")" : "" }}
+      </button>
+
+      <!-- PAID Checkout button always when forSale -->
+      <button
+        *ngIf="forSale$ | async"
+        mat-raised-button
+        class="btn-primary small"
+        (click)="goToCheckout()"
+        [disabled]="selectMode && selectedCount === 0"
+      >
+        Checkout {{ selectMode ? "(" + selectedCount + ")" : "" }}
+      </button>
+    </div>
+  </ng-container>
 </div>

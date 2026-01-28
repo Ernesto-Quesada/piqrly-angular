@@ -1,10 +1,15 @@
 import { QrViewResponse } from '../../models/qr-read-response';
 
-export const initialDataState: QrViewResponse = JSON.parse(
-  localStorage.getItem('appState') || '{}'
-)?.landingData ?? {
+export const initialDataState: QrViewResponse = {
   pictures: [],
-  qr: '',
-  price: { small: 0, full: 0 },
-  user: {},
+  owner: null,
+  forSale: false,
+  price: null,
+
+  // ✅ event header defaults
+  eventName: null,
+  isPublic: null,
+  qrCode: null,
+  isOwner: null,
+  isInvited: null,
 };

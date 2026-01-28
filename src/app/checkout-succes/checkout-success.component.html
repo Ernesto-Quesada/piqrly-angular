@@ -1,8 +1,76 @@
-<mat-card>
-  <mat-card-title>Payment Successful</mat-card-title>
-  <mat-card-content>
-    <p>Your payment has been processed successfully!</p>
-    <p>Your session ID is: {{ sessionId }}</p>
-    <!-- You can display a download link or additional instructions here -->
-  </mat-card-content>
-</mat-card>
+<!-- checkout-success.component.html (FULL FILE) -->
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-7">
+      <mat-card class="p-3">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <div class="h5 mb-1">Payment Successful</div>
+            <div class="text-muted" style="font-size: 13px">
+              Your purchase is confirmed. Your download will start
+              automatically.
+            </div>
+          </div>
+
+          <mat-icon style="font-size: 30px; width: 30px; height: 30px">
+            check_circle
+          </mat-icon>
+        </div>
+
+        <hr class="my-3" />
+
+        <div class="row g-2">
+          <div class="col-12" *ngIf="verifying">
+            <div class="text-muted">Verifying payment…</div>
+          </div>
+
+          <div class="col-12" *ngIf="downloading && !downloadStarted">
+            <div class="text-muted">Preparing your download…</div>
+          </div>
+
+          <div class="col-12" *ngIf="downloadStarted && !error">
+            <div class="alert alert-success mb-0">
+              <strong>Download started.</strong>
+              <span class="d-block mt-1" style="font-size: 13px">
+                If your phone asks “Keep / Discard”, tap <b>Keep</b>.
+              </span>
+            </div>
+          </div>
+
+          <div class="col-12" *ngIf="error">
+            <div class="alert alert-warning mb-0">
+              {{ error }}
+            </div>
+          </div>
+
+          <div class="col-12" *ngIf="!error && !loading">
+            <div class="d-flex flex-wrap gap-2 mt-2">
+              <button
+                mat-raised-button
+                class="enabledCheckout"
+                (click)="downloadAgain()"
+              >
+                <mat-icon>download</mat-icon>
+                Download pics
+              </button>
+
+              <button
+                mat-stroked-button
+                class="enabledCheckout"
+                (click)="backToPhotos()"
+              >
+                <mat-icon>arrow_back</mat-icon>
+                Back to photos
+              </button>
+            </div>
+
+            <div class="text-muted mt-2" style="font-size: 12px">
+              If the download didn’t start, your browser may be blocking it —
+              click “Download again”.
+            </div>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+  </div>
+</div>

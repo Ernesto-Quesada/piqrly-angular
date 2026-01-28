@@ -7,6 +7,7 @@ import {
   loadPicturePriceFailure,
   loadPicturePriceSuccess,
 } from '../actions/landingData.actions';
+import { EventService } from '../../services/event.service';
 
 @Injectable()
 export class LandingDataEffects {
@@ -14,25 +15,55 @@ export class LandingDataEffects {
 
   constructor(
     private actions$: Actions,
-    private pictureService: PictureService
+    private pictureService: PictureService,
+    private eventService: EventService,
   ) {
     this.globalData$ = createEffect(() =>
       this.actions$.pipe(
         ofType(landingDataLoad),
-        mergeMap(({ qr }) => {
-          console.log('Effect triggered with QR:', qr); // Debugging
-          return this.pictureService.getPicturesByQrCode(qr).pipe(
-            map((response) => {
-              console.log('API Response:', response); // Debugging
-              return loadPicturePriceSuccess({ response });
+        mergeMap(({ qr, inviteCode }) => {
+          // ✅ Decide which API call to use
+          const hasInvite = !!inviteCode && inviteCode.trim().length > 0;
+          const hasQr = !!qr && qr.trim().length > 0;
+
+          if (hasInvite) {
+            console.log('Effect triggered with INVITE:', inviteCode);
+            return this.eventService
+              .getEventPicturesByQrCode(inviteCode!.trim())
+              .pipe(
+                map((response) => {
+                  console.log('API Response:', response);
+                  return loadPicturePriceSuccess({ response });
+                }),
+                catchError((error) => {
+                  console.error('API Error:', error);
+                  return of(loadPicturePriceFailure({ error }));
+                }),
+              );
+          }
+
+          if (hasQr) {
+            console.log('Effect triggered with QR:', qr);
+            return this.pictureService.getPicturesByQrCode(qr!.trim()).pipe(
+              map((response) => {
+                console.log('API Response:', response);
+                return loadPicturePriceSuccess({ response });
+              }),
+              catchError((error) => {
+                console.error('API Error:', error);
+                return of(loadPicturePriceFailure({ error }));
+              }),
+            );
+          }
+
+          // ✅ nothing provided
+          return of(
+            loadPicturePriceFailure({
+              error: 'landingDataLoad requires qr or inviteCode',
             }),
-            catchError((error) => {
-              console.error('API Error:', error); // Debugging
-              return of(loadPicturePriceFailure({ error }));
-            })
           );
-        })
-      )
+        }),
+      ),
     );
   }
 }

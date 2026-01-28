@@ -12,7 +12,7 @@ export class CheckoutService {
   createCheckoutSession(payload: any): Observable<{ sessionId: string }> {
     return this.http.post<{ sessionId: string }>(
       API.checkout.createSession,
-      payload
+      payload,
     );
   }
 
@@ -24,7 +24,7 @@ export class CheckoutService {
       API.checkout.verifySession,
       {
         sessionId,
-      }
+      },
     );
   }
 
@@ -34,12 +34,6 @@ export class CheckoutService {
       sessionId,
     });
   }
-
-  // fetchPaidPictures(sessionId: string) {
-  //   return this.http.get<{ pictureUrls: string[] }>(
-  //     `http://localhost:8080/verify-checkout-session/paid-pictures/${sessionId}`
-  //   );
-  // }
 
   getWebCart(cartId: string): Observable<any> {
     // api/mobile/web-cart/:cartId
@@ -53,7 +47,7 @@ export class CheckoutService {
   }): Observable<{ sessionId: string }> {
     return this.http.post<{ sessionId: string }>(
       API.checkout.webCheckoutSession,
-      payload
+      payload,
     );
   }
 }

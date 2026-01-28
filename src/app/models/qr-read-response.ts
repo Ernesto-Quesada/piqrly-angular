@@ -1,34 +1,17 @@
+import { Image, Price, ImageOwner } from './response';
+
 export interface QrViewResponse {
-  pictures: QrPicture[];
-  owner: QrOwner | null;
+  pictures: Image[];
+  owner: ImageOwner | null;
   forSale: boolean;
-  price: QrPrice | null;
-}
+  price: Price | null;
 
-export interface QrPicture {
-  id: string;
-  pictureId: string;
-  qrCode: string;
-  imageUrl: string;
-  //   createdAt: string; // ISO date string
-}
+  // ✅ Event invite flow extras (optional so QR flow doesn’t break)
+  eventName?: string | null;
+  isPublic?: boolean | null;
 
-export interface QrOwner {
-  email: string;
-  firstName: string;
-  lastName: string;
-  profilePic: string | null;
-  displayName: string | null;
-  shortBio: string | null;
-  stripeAccountId: string | null;
-  followers: number;
-  following: number;
-  sales: number;
-  revenue: number;
-}
-
-export interface QrPrice {
-  priceSmall: number;
-  priceFull: number;
-  priceRoyalty: number;
+  // (optional: present in your JSON, safe to include)
+  qrCode?: string | null;
+  isOwner?: boolean | null;
+  isInvited?: boolean | null;
 }

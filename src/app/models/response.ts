@@ -1,22 +1,33 @@
 export interface Image {
-  id: string; // Unique identifier for the image
-  pictureId: string; // Unique identifier for the image
-  qrCode: string; // QR code associated with the image
-  imageUrl: string; // URL of the image
+  id: string;
+  pictureId: string;
+  qrCode: string;
+  imageUrl: string;
+  previewImageUrl: string;
   description?: string; // Optional description for the image
   createdAt?: string; // Optional creation date of the image
 }
 export interface Price {
-  small: number; // Price for small size
-  full: number; // Price for full size
+  priceSmall: number;
+  priceFull: number;
+  priceRoyalty: number;
 }
 
 export interface ImageOwner {
   // Represents an item in the shopping cart
-  name: string;
   email: string;
+  firstName: string;
+  lastName: string;
+  profilePic: string | null;
+  displayName: string | null;
   phone: string;
   business?: Company | null; // Optional business information
+  shortBio: string | null;
+  stripeAccountId: string | null;
+  followers: number;
+  following: number;
+  // sales: number;
+  // revenue: number;
 }
 export interface Company {
   companyName: string;

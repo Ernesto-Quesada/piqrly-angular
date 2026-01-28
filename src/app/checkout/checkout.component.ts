@@ -69,6 +69,9 @@ export class CheckoutComponent implements OnInit {
 
   webCartItems: any[] = [];
 
+  // ✅ NEW: blocks double click + multiple in-flight requests
+  isPaying = false;
+
   constructor(
     private fb: FormBuilder,
     private store: Store<{ cart: ShopCart }>,
@@ -85,7 +88,28 @@ export class CheckoutComponent implements OnInit {
     this.checkoutState$ = this.store.pipe(select(selectShopCartState));
   }
 
+  // ✅ NEW: one safe way to return to the page the user started on
+  private goBackToLanding(): void {
+    const returnUrl = sessionStorage.getItem('returnUrl') || '/';
+    // ✅ do NOT remove returnUrl here; keep it stable for any further back navigations
+    window.location.replace(returnUrl);
+  }
+
   ngOnInit(): void {
+    const cameFromStripe =
+      sessionStorage.getItem('stripeRedirected') === '1' ||
+      document.referrer.includes('checkout.stripe.com');
+
+    // ✅ If user navigates back into /checkout from Stripe, never show checkout again
+    if (cameFromStripe) {
+      // cleanup just the stripe marker
+      sessionStorage.removeItem('stripeRedirected');
+
+      // hard redirect so history is clean
+      this.goBackToLanding();
+      return;
+    }
+
     // 1) cartId mode (Flutter -> Web cart)
     this.route.queryParamMap.subscribe((params) => {
       this.cartId = params.get('cartId');
@@ -96,6 +120,12 @@ export class CheckoutComponent implements OnInit {
           next: (cart) => {
             console.log('🛒 WEB CART DEBUG from API:', cart);
             this.webCartItems = cart.items || [];
+
+            // ✅ If cart is empty, do NOT allow checkout page to exist
+            if (!this.webCartItems || this.webCartItems.length === 0) {
+              this.goBackToLanding();
+              return;
+            }
 
             // compute totals from webCartItems
             const fullItems = this.webCartItems.filter(
@@ -139,6 +169,8 @@ export class CheckoutComponent implements OnInit {
           },
           error: (err) => {
             console.error('❌ WEB CART ERROR:', err);
+            // ✅ If web cart can't load, don't leave them on dead checkout
+            this.goBackToLanding();
           },
         });
       }
@@ -154,6 +186,12 @@ export class CheckoutComponent implements OnInit {
       .pipe(
         map((cartState) => {
           if (this.cartId) return; // cart mode totals handled above
+
+          // ✅ If QR cart is empty, do NOT allow checkout page to exist
+          if (!cartState?.items || cartState.items.length === 0) {
+            this.goBackToLanding();
+            return;
+          }
 
           const fullItems = cartState.items.filter((i) => i.size === 'full');
           const smallItems = cartState.items.filter((i) => i.size === 'small');
@@ -195,12 +233,34 @@ export class CheckoutComponent implements OnInit {
       .subscribe();
   }
 
-  pay(event: Event) {
+  async pay(event: Event) {
     event.preventDefault();
+
+    // ✅ block double-click / spam-click
+    if (this.isPaying) return;
+    this.isPaying = true;
+
+    // ✅ Always ensure we have a returnUrl (landing page) before leaving site
+    sessionStorage.setItem(
+      'returnUrl',
+      sessionStorage.getItem('returnUrl') ||
+        window.location.pathname + window.location.search
+    );
 
     // ✅ 1) APP CART FLOW (Flutter → web): we have ?cartId=...
     if (this.cartId) {
-      if (this.checkoutForm.invalid) return;
+      // if invalid form, re-enable button
+      if (this.checkoutForm.invalid) {
+        this.isPaying = false;
+        return;
+      }
+
+      // ✅ Safety: don't allow pay if cart failed to load / empty
+      if (!this.webCartItems || this.webCartItems.length === 0) {
+        this.isPaying = false;
+        this.goBackToLanding();
+        return;
+      }
 
       const payload = {
         cartId: this.cartId,
@@ -208,33 +268,76 @@ export class CheckoutComponent implements OnInit {
         email: this.checkoutForm.value.email,
       };
 
-      this.checkoutService
-        .createWebCartCheckoutSession(payload)
-        .subscribe(async (data) => {
+      this.checkoutService.createWebCartCheckoutSession(payload).subscribe({
+        next: async (data) => {
           const sessionId = data.sessionId;
           console.log('🧾 Web-cart Session ID:', sessionId);
 
           const stripe = await this.stripePromise;
-          stripe?.redirectToCheckout({ sessionId });
-        });
+
+          // ✅ mark that we left for Stripe so /checkout can bounce safely if we come back
+          sessionStorage.setItem('stripeRedirected', '1');
+
+          const result = await stripe?.redirectToCheckout({ sessionId });
+
+          // ✅ if redirect fails (popup blocker / network), unlock button
+          if (result?.error) {
+            console.error(result.error);
+            this.isPaying = false;
+          }
+        },
+        error: (err) => {
+          console.error('❌ createWebCartCheckoutSession failed:', err);
+          this.isPaying = false;
+        },
+      });
 
       return;
     }
 
     // ✅ 2) QR FLOW
-    this.checkoutState$.pipe(take(1)).subscribe((state) => {
-      const payload = {
-        totalAmount: state.subtotalPrice * 100,
-        user: state.user,
-        pictureIds: state.items.map((item) => item.image.pictureId),
-      };
+    this.checkoutState$.pipe(take(1)).subscribe({
+      next: (state) => {
+        // ✅ Safety: don't allow pay if empty cart
+        if (!state?.items || state.items.length === 0) {
+          this.isPaying = false;
+          this.goBackToLanding();
+          return;
+        }
 
-      this.checkoutService
-        .createCheckoutSession(payload)
-        .subscribe(async (data) => {
-          const stripe = await this.stripePromise;
-          stripe?.redirectToCheckout({ sessionId: data.sessionId });
+        const payload = {
+          totalAmount: state.subtotalPrice * 100,
+          user: state.user,
+          pictureIds: state.items.map((item) => item.image.pictureId),
+        };
+
+        this.checkoutService.createCheckoutSession(payload).subscribe({
+          next: async (data) => {
+            const stripe = await this.stripePromise;
+
+            // ✅ mark that we left for Stripe so /checkout can bounce safely if we come back
+            sessionStorage.setItem('stripeRedirected', '1');
+
+            const result = await stripe?.redirectToCheckout({
+              sessionId: data.sessionId,
+            });
+
+            // ✅ if redirect fails, unlock button
+            if (result?.error) {
+              console.error(result.error);
+              this.isPaying = false;
+            }
+          },
+          error: (err) => {
+            console.error('❌ createCheckoutSession failed:', err);
+            this.isPaying = false;
+          },
         });
+      },
+      error: (err) => {
+        console.error('❌ checkoutState$ failed:', err);
+        this.isPaying = false;
+      },
     });
   }
 }

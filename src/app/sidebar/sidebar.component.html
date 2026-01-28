@@ -1,50 +1,113 @@
-<div class="h-100">
-  <mat-sidenav-container class="example-container w-100 h-100">
-    <mat-sidenav #sidenav mode="side" [(opened)]="opened">
-      <mat-list>
-        <mat-list-item>
-          <mat-icon>home</mat-icon>
-          <span class="ml-2 ps-3 pt-1">Home</span>
-        </mat-list-item>
+<div class="h-100 app-shell">
+  <mat-sidenav-container class="shell-container w-100 h-100">
+    <!-- SIDEBAR -->
+    <mat-sidenav
+      #sidenav
+      [mode]="isDesktop ? 'side' : 'over'"
+      [(opened)]="opened"
+      class="shell-sidenav"
+    >
+      <!-- SIDEBAR HEADER (MOBILE ONLY BRAND) -->
+      <div class="sidenav-header container-fluid d-md-none">
+        <div class="row align-items-center gx-2">
+          <div class="col">
+            <div class="brand brand-compact">
+              <div class="brand-mark">P</div>
+              <div class="brand-text">
+                <!-- <div class="brand-title">Piqrly</div> -->
+                <div class="brand-subtitle">Photos & QR sharing</div>
+              </div>
+            </div>
+          </div>
 
-        <mat-list-item>
+          <div class="col-auto">
+            <button
+              mat-icon-button
+              class="icon-bubble fab-icon"
+              (click)="toggleSidenav(sidenav)"
+              aria-label="Close menu"
+            >
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- NAV -->
+      <mat-nav-list class="nav">
+        <a mat-list-item class="nav-item" [routerLink]="['/public']">
+          <mat-icon>home</mat-icon>
+          <span>Home</span>
+        </a>
+
+        <a mat-list-item class="nav-item">
           <mat-icon>download</mat-icon>
-          <span class="ml-2 ps-3 pt-1">Download App</span>
-        </mat-list-item>
-      </mat-list>
-      <div class="sidenav-footer ml-2 ps-2">
-        <!-- <mat-list-item class="list-item"> -->
-        <mat-icon>gavel</mat-icon>
-        <span class="ml-2 ps-3 pt-1">TaC</span>
-        <!-- </mat-list-item> -->
+          <span>Download App</span>
+        </a>
+      </mat-nav-list>
+
+      <div class="sidenav-footer">
+        <a class="footer-link">
+          <mat-icon>gavel</mat-icon>
+          <span>Terms & Conditions</span>
+        </a>
       </div>
     </mat-sidenav>
 
-    <mat-sidenav-content>
-      <!-- <p><mat-checkbox [(ngModel)]="opened" style="color: white;">sidenav.opened</mat-checkbox></p> -->
-      <!-- <p><button mat-button (click)="sidenav.toggle() ">sidenav.toggle()</button></p> -->
-      <button
-        mat-icon-button
-        (click)="toggleSidenav(sidenav)"
-        class="position-absolute"
-      >
-        <mat-icon [@iconState]="opened ? 'opened' : 'closed'">
-          {{ opened ? "chevron_right" : "menu" }}
-        </mat-icon>
-      </button>
-      <button
-        *ngIf="cartBadgeCount > 0"
-        mat-icon-button
-        [routerLink]="['/checkout']"
-        routerLinkActive="router-link-active"
-        class="position-absolute shopping-cart"
-      >
-        <span matBadge="{{ cartBadgeCount }}" class="material-icons-outlined">
-          shopping_cart
-        </span>
-      </button>
+    <!-- CONTENT -->
+    <mat-sidenav-content class="shell-content">
+      <!-- GLOBAL HEADER -->
+      <header class="app-header container-fluid">
+        <div class="row align-items-center gx-2">
+          <!-- MENU / CHEVRON -->
+          <div class="col-auto">
+            <button
+              mat-icon-button
+              class="icon-bubble fab-icon"
+              (click)="toggleSidenav(sidenav)"
+              aria-label="Toggle menu"
+            >
+              <mat-icon>{{ opened ? "chevron_left" : "menu" }}</mat-icon>
+            </button>
+          </div>
 
-      <router-outlet></router-outlet>
+          <!-- BRAND -->
+          <div class="col text-center text-md-start">
+            <div class="brand-inline">
+              <!-- <div class="brand-mark">P</div> -->
+              <div class="brand-title">Piqrly</div>
+            </div>
+          </div>
+
+          <!-- CART -->
+          <div class="col-auto">
+            <button
+              *ngIf="cartBadgeCount > 0"
+              mat-icon-button
+              class="icon-bubble"
+              [routerLink]="['/checkout']"
+              aria-label="Cart"
+            >
+              <span
+                matBadge="{{ cartBadgeCount }}"
+                class="material-icons-outlined"
+              >
+                shopping_cart
+              </span>
+            </button>
+
+            <div
+              *ngIf="cartBadgeCount <= 0"
+              style="width: 44px; height: 44px"
+            ></div>
+          </div>
+        </div>
+      </header>
+
+      <!-- PAGE CONTENT -->
+      <div class="page">
+        <router-outlet></router-outlet>
+      </div>
     </mat-sidenav-content>
   </mat-sidenav-container>
 </div>

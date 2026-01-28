@@ -30,4 +30,4 @@ To run in all devices use :
 
 ## ng serve --host 0.0.0.0
 
-then access to http://192.168.0.107:4200/ or Local: http://localhost:4200/
+then access to http://192.168.0.107:4200/ or the current IP of the machine or Local: http://localhost:4200/

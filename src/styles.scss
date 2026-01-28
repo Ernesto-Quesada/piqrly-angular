@@ -1,40 +1,170 @@
 /* You can add global styles to this file, and also import other style files */
 
 @use '@angular/material' as mat;
-html, body { height: 100vh; }
-body { 
-    margin: 0; 
-    font-family: Lato, Roboto, sans-serif !important;
-    color: #5b5b5b;
-    background-color: #f8fafd; /* Default background color for the body */}
-// .app-color {
-//     color: #f6fdff
-// }
-// .app-bgc {
-//     background-color: #242627
-// }
-.mat-icon {
-    color: #5b5b5b; /* Applies color to all Angular Material icons */
-  }
+
+/* ================================
+   APP DESIGN TOKENS
+   ================================ */
+:root {
+  /* Brand */
+  --app-primary: rgb(43, 189, 238); /* main blue */
+  --app-primary-soft: #e8f0ff;
+  --app-accent: #ffcd0e;
+
+  /* Text */
+  --app-text-main: #0f172a;
+  --app-text-muted: #64748b;
   
-  mat-list-item  span{
-    color: #5b5b5b; /* Applies text color to list items */
-  }
-  mat-sidenav-container {
-    background-color: #f8fafd;
-  }
-  mat-sidenav {background-color: #f0f4f9 ;} .mat-drawer {
-    background-color: #f8fafd;
-  }
- 
-  .custom-backdrop {
-    background-color: rgba(0, 0, 0, 0.95) !important;
-  }
-  .disabledCheckoutColor{
-    color: rgba(26, 27, 31)!important;
-    background-color: rgba(26, 27, 31, 0.12) !important;
-  }
-  .enabledCheckout{
-    background-color: rgb(255, 205, 14) !important;
-    color:rgb(48, 48, 48)!important;
-  }
+
+  /* Icons */
+  --app-icon-default: var(--app-text-muted);
+  --app-icon-on-primary: rgb(255, 5, 5);
+  --icon-cta: #ffffff;
+
+  /* Surfaces */
+  --app-bg: #f8fafd;
+  --app-panel: #ffffff;
+  --app-sidenav: #f0f4f9;
+
+  /* Radius */
+  --app-radius-sm: 10px;
+  --app-radius-md: 14px;
+  --app-radius-lg: 18px;
+  --app-radius-pill: 999px;
+
+  /* Shadows */
+  --app-shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.06);
+  --app-shadow-md: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+/* ================================
+   BASE / GLOBAL
+   ================================ */
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Lato, Roboto, sans-serif !important;
+  color: var(--app-text-muted);
+  background-color: var(--app-bg);
+}
+
+/* ================================
+   ANGULAR MATERIAL GLOBAL OVERRIDES
+   ================================ */
+
+/* Default icon color (most icons will inherit this) */
+//.mat-icon,
+.material-icons,
+.material-icons-outlined {
+  color: var(--app-icon-on-primary);
+}
+.mat-icon {
+  color: var(--icon-cta)
+}
+a .mat-icon {
+  color: var(--app-icon-default) !important;
+}
+
+/* List text */
+mat-list-item span {
+  color: var(--app-text-muted);
+}
+
+/* Buttons: rounded like Flutter */
+.mat-mdc-raised-button,
+.mat-mdc-unelevated-button,
+.mat-mdc-stroked-button,
+.mat-mdc-outlined-button,
+.mat-mdc-button {
+  border-radius: var(--app-radius-pill) !important;
+}
+
+/* Add a light shadow to filled buttons */
+.mat-mdc-raised-button,
+.mat-mdc-unelevated-button {
+  box-shadow: var(--app-shadow-sm);
+}
+
+/* Primary filled button colors (MDC variables) */
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-unelevated-button.mat-primary {
+  --mdc-filled-button-container-color: var(--app-primary);
+  --mdc-filled-button-label-text-color: #ffffff;
+  color: #ffffff !important; /* ensures currentColor is white */
+}
+
+/* Ensure icons inside primary buttons are white */
+.mat-mdc-raised-button.mat-primary .mat-icon,
+.mat-mdc-unelevated-button.mat-primary .mat-icon {
+  color: var(--app-icon-on-primary) !important;
+}
+
+/* Badges */
+.mat-badge-content {
+  background-color: var(--app-accent) !important;
+  color: #303030 !important;
+}
+
+/* App backgrounds */
+mat-sidenav-container {
+  background-color: var(--app-bg);
+}
+
+mat-sidenav,
+.mat-drawer {
+  background-color: var(--app-sidenav);
+}
+
+/* Backdrop for dialogs/modals */
+.custom-backdrop {
+  background-color: rgba(0, 0, 0, 0.95) !important;
+}
+
+/* Checkout buttons you already use */
+.disabledCheckoutColor {
+  color: rgba(26, 27, 31) !important;
+  background-color: rgba(26, 27, 31, 0.12) !important;
+}
+
+.enabledCheckout {
+  background-color: rgb(255, 205, 14) !important;
+  color: rgb(48, 48, 48) !important;
+}
+
+/* ================================
+   OPTIONAL APP UTILITIES (reusable)
+   ================================ */
+.app-card {
+  background: var(--app-panel);
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow-md);
+}
+
+.btn-primary {
+  background: var(--app-primary) !important;
+  color: #fff !important;
+  border-radius: var(--app-radius-pill) !important;
+}
+.btn-secondary {
+  background: var(--app-bg) !important;
+  color: var(--app-primary) !important;
+  border-radius: var(--app-radius-pill) !important;
+  .mat-icon {
+    color: var(--app-primary) !important;
+  } 
+}
+
+.btn-primary .mat-icon {
+  color: var(--icon-cta) !important;//buttons
+}
+
+/* Useful for your round icon buttons (menu/cart bubbles) */
+.fab-icon {
+  background: var(--app-primary) !important;
+  //border-radius: 50%;
+  box-shadow: var(--app-shadow-md);
+}

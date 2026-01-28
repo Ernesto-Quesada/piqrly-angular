@@ -1,6 +1,6 @@
 import { select, Store } from '@ngrx/store';
 import { RouterModule, RouterOutlet } from '@angular/router';
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { FormsModule } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -61,8 +61,16 @@ import { CartItem, ShopCart } from '../models/shopCart';
 export class SidebarComponent implements OnInit {
   events: string[] = [];
   opened!: boolean;
-  isDesktop = true;
+  // isDesktop = true;
   cartBadgeCount = 0;
+  isDesktop = window.innerWidth > 900;
+
+  @HostListener('window:resize')
+  onResize() {
+    this.isDesktop = window.innerWidth > 900;
+    if (!this.isDesktop) this.opened = false; // optional: auto-close on mobile
+  }
+
   constructor(private store: Store<{ cart: ShopCart }>) {}
 
   ngOnInit(): void {

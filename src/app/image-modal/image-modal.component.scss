@@ -1,76 +1,70 @@
-
-@use '@angular/material' as mat;
-
 mat-card {
-    padding: 0;
-  }
-  img {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
+  padding: 0;
+}
 
+.modal-content {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background: #000;
+}
 
-  .example-button-container {
-    display: flex;
-    justify-content: center;
-    width: 140px;
-  }
+/* ✅ horizontal swipe strip */
+.swipe-strip {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
 
-  .modal-card {
-    position: relative;
-    padding: 0;
-    overflow: hidden;
-  
-  }
-  
-  .full-image {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
-  
-  .back-button {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    background: rgb(0, 0, 0);
-    border:none;
-    z-index: 10;
-  }
-  .back-button-icon {
-    color: white;
-    font-size: 24px; /* Adjust icon size */
-  }
-  
-  .check-button {
-    // position: absolute;
-    // top: 8px;
-    // right: 8px;
-    background: rgba(255, 255, 255);
-    z-index: 10;
-  }
-  .modal-bottom-icon {
-    color: #fff;
-  }
-  
+.slide {
+  flex: 0 0 100vw;
+  height: 100vh;
+  scroll-snap-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
+.modal-card {
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+}
 
+.full-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
 
-
-  /* Top icons: back arrow and check mark */
+/* Top icons */
 .dialog-top-icons {
   position: fixed;
   top: 16px;
   left: 0;
   width: 100%;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   padding: 0 16px;
-  z-index: 1001; /* Ensure it sits above the dialog and backdrop */
+  z-index: 1001;
 }
 
-/* Bottom icons: evenly spaced comments, like, share */
+.back-button {
+  background: rgba(0, 0, 0, 0.65);
+  border: none;
+}
+
+.back-button-icon {
+  color: white;
+  font-size: 24px;
+}
+
+/* Bottom icons */
 .dialog-bottom-icons {
   position: fixed;
   bottom: 16px;
@@ -78,23 +72,16 @@ mat-card {
   width: 100%;
   display: flex;
   justify-content: space-evenly;
+  gap: 8px;
+  padding: 0 12px;
   z-index: 1001;
 }
 
-/* Center the modal content in the viewport */
-// .modal-content {
-//   display: flex;
-//   justify-content: center;
-//   align-items: center;
-//   /* Ensure it fills available space but doesn't interfere with fixed icons */
-//   min-height: 100vh;
-// }
+.modal-bottom-icon {
+  color: #fff;
+}
 
-/* Modal card styling */
-
-/* Full image styling */
-.full-image {
-  width: 100%;
-  height: auto;
-  display: block;
+.check-button {
+  background: rgba(255, 255, 255, 0.95);
+  z-index: 10;
 }
