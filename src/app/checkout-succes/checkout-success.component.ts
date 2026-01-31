@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -32,7 +32,7 @@ export class CheckoutSuccessComponent implements OnInit, OnDestroy {
 
   // ✅ Mobile browsers hate auto-download + popups (gesture required)
   private readonly isMobile = /iPhone|iPad|iPod|Android/i.test(
-    navigator.userAgent
+    navigator.userAgent,
   );
 
   private verifyTimer: any = null;
@@ -44,7 +44,8 @@ export class CheckoutSuccessComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private checkoutService: CheckoutService,
     private pictureService: PictureService,
-    private store: Store
+    private store: Store,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -119,7 +120,7 @@ export class CheckoutSuccessComponent implements OnInit, OnDestroy {
 
   private onPopState = () => {
     // ✅ When user hits phone back, send them to photos instead of Stripe “done here”
-    window.location.href = this.returnUrl;
+    this.router.navigateByUrl(this.returnUrl);
   };
 
   // ✅ NEW: remove only the cart slice from the persisted appState
@@ -139,8 +140,9 @@ export class CheckoutSuccessComponent implements OnInit, OnDestroy {
   }
 
   backToPhotos(): void {
+    const url = sessionStorage.getItem('returnUrl') || '/';
     sessionStorage.removeItem('returnUrl');
-    window.location.href = this.returnUrl;
+    this.router.navigateByUrl(url);
   }
 
   fetchZipAndDownload(): void {
@@ -177,7 +179,7 @@ export class CheckoutSuccessComponent implements OnInit, OnDestroy {
           // ✅ DESKTOP: auto-start download is fine
           if (!this.isMobile) {
             this.downloadStarted = true;
-            window.location.href = this.downloadUrl;
+            this.router.navigateByUrl(this.downloadUrl);
             return;
           }
 
@@ -212,6 +214,6 @@ export class CheckoutSuccessComponent implements OnInit, OnDestroy {
 
     // ✅ On mobile, this click is the user gesture → best chance to avoid popup blockers
     this.downloadStarted = true;
-    window.location.href = this.downloadUrl;
+    this.router.navigateByUrl(this.downloadUrl);
   }
 }

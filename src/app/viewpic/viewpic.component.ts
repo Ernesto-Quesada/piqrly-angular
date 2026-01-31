@@ -1,5 +1,5 @@
 // viewpic.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatGridListModule } from '@angular/material/grid-list';
@@ -15,7 +15,8 @@ import {
   BehaviorSubject,
   distinctUntilChanged,
   map,
-  combineLatest,
+  Subject,
+  takeUntil,
 } from 'rxjs';
 
 import { Image, ImageOwner } from '../models/response';
@@ -40,7 +41,6 @@ import {
   removeImageFromCart,
 } from '../store/actions/shopcart.actions';
 import { selectItems } from '../store/selectors/shopcart.selector';
-import { EventService } from '../services/event.service';
 
 type Size = 'small' | 'full' | 'royalty';
 type LandingAny = any;
@@ -52,14 +52,15 @@ type LandingAny = any;
   templateUrl: './viewpic.component.html',
   styleUrl: './viewpic.component.scss',
 })
-export class ViewpicComponent implements OnInit {
+export class ViewpicComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+
   qr?: string;
   inviteCode?: string;
 
   eventName?: string;
   isPublic?: boolean;
 
-  // ✅ unified qrCode used for download zip in BOTH flows
   activeQrCode?: string;
 
   images$: Observable<Image[]> = of([]);
@@ -89,8 +90,10 @@ export class ViewpicComponent implements OnInit {
   selectedSize: Size = 'small';
   isDesktop = false;
 
-  // used for fast lookup / badges
   private cartMap = new Map<string, { size: Size | null; price: number }>();
+
+  private readonly CONTEXT_KEY = 'viewpic_context';
+  private readonly SELECT_MODE_KEY = 'viewpic_select_mode';
 
   constructor(
     private route: ActivatedRoute,
@@ -99,15 +102,40 @@ export class ViewpicComponent implements OnInit {
     private storeLanding: Store<{ landingData: QrViewResponse }>,
     private storeShopCart: Store<{ shopCart: ShopCart }>,
     private pictureService: PictureService,
-    private eventService: EventService,
   ) {
     this.cartItems$ = this.storeShopCart.pipe(select(selectItems));
   }
 
   ngOnInit() {
-    this.route.paramMap.subscribe((params) => {
+    // restore selectMode preference (when returning from checkout)
+    const savedSelectMode = sessionStorage.getItem(this.SELECT_MODE_KEY);
+    if (savedSelectMode === '1') {
+      this.selectMode = true;
+      this.selectModeSubject.next(true);
+    }
+
+    this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       const qrid = params.get('qrid');
       const code = params.get('code');
+
+      const nextContext = this._makeContext(qrid, code);
+      const prevContext = sessionStorage.getItem(this.CONTEXT_KEY);
+
+      // ✅ only clear cart if we truly switched QR/invite
+      const contextChanged =
+        !!prevContext && !!nextContext && prevContext !== nextContext;
+
+      if (contextChanged) {
+        this.storeShopCart.dispatch(clearShopCart());
+
+        this.selectMode = false;
+        this.selectModeSubject.next(false);
+        sessionStorage.setItem(this.SELECT_MODE_KEY, '0');
+      }
+
+      if (nextContext) {
+        sessionStorage.setItem(this.CONTEXT_KEY, nextContext);
+      }
 
       if (qrid && qrid.trim().length > 0) {
         this.qr = qrid.trim();
@@ -115,13 +143,7 @@ export class ViewpicComponent implements OnInit {
         this.eventName = undefined;
         this.isPublic = undefined;
 
-        // ✅ QR flow download should use route qr
         this.activeQrCode = this.qr;
-
-        // ✅ clear previous selection/cart when switching codes
-        this.storeShopCart.dispatch(clearShopCart());
-        this.selectMode = false;
-        this.selectModeSubject.next(false);
 
         this.storeLanding.dispatch(landingDataLoad({ qr: this.qr }));
         return;
@@ -131,13 +153,7 @@ export class ViewpicComponent implements OnInit {
         this.inviteCode = code.trim();
         this.qr = undefined;
 
-        // ✅ Event flow: activeQrCode will come from landing response (res.qrCode)
         this.activeQrCode = undefined;
-
-        // ✅ clear previous selection/cart when switching codes
-        this.storeShopCart.dispatch(clearShopCart());
-        this.selectMode = false;
-        this.selectModeSubject.next(false);
 
         this.storeLanding.dispatch(
           landingDataLoad({ inviteCode: this.inviteCode }),
@@ -157,12 +173,14 @@ export class ViewpicComponent implements OnInit {
 
     // Extract event fields + activeQrCode from landingData when invite flow is active
     this.storeLanding
-      .pipe(select((s: any) => s.landingData as LandingAny))
+      .pipe(
+        takeUntil(this.destroy$),
+        select((s: any) => s.landingData as LandingAny),
+      )
       .subscribe((res: LandingAny) => {
         if (!this.inviteCode) {
           this.eventName = undefined;
           this.isPublic = undefined;
-          // QR flow already sets activeQrCode from route param
           return;
         }
 
@@ -171,12 +189,11 @@ export class ViewpicComponent implements OnInit {
         this.isPublic =
           typeof res?.isPublic === 'boolean' ? res.isPublic : undefined;
 
-        // ✅ IMPORTANT: Event responses include qrCode in JSON
         this.activeQrCode =
           typeof res?.qrCode === 'string' ? res.qrCode : undefined;
       });
 
-    // Private event flag: inviteCode present AND isPublic is not true
+    // Private event flag
     this.isPrivateEvent$ = this.storeLanding.pipe(
       select((s: any) => s.landingData as LandingAny),
       map((res: LandingAny) => {
@@ -187,14 +204,13 @@ export class ViewpicComponent implements OnInit {
         const pub =
           typeof res?.isPublic === 'boolean' ? res.isPublic : undefined;
 
-        // NOTE: this treats undefined as private until response loads
         return pub !== true;
       }),
       distinctUntilChanged(),
     );
 
-    // Keep cartMap + selectedCount synced
-    this.cartItems$.subscribe((items) => {
+    // ✅ Keep cartMap + selectedCount synced AND keep selectMode UI consistent
+    this.cartItems$.pipe(takeUntil(this.destroy$)).subscribe((items) => {
       this.cartMap.clear();
       for (const it of items) {
         this.cartMap.set(it.image.pictureId, {
@@ -202,16 +218,31 @@ export class ViewpicComponent implements OnInit {
           price: it.price,
         });
       }
+
       this.selectedCount = items.length;
 
-      // ✅ If selection mode is ON but user removed last selection → auto-exit
-      if (this.selectMode && this.selectedCount === 0) {
-        this.selectMode = false;
-        this.selectModeSubject.next(false);
+      // ✅ If there are items, selectMode must be ON so radios appear immediately
+      if (this.selectedCount > 0 && !this.selectMode) {
+        this.selectMode = true;
+        this.selectModeSubject.next(true);
+        sessionStorage.setItem(this.SELECT_MODE_KEY, '1');
       }
     });
 
     this.selectModeSubject.next(this.selectMode);
+  }
+
+  private _makeContext(
+    qrid: string | null,
+    code: string | null,
+  ): string | null {
+    const q = (qrid ?? '').trim();
+    if (q.length > 0) return `QR:${q}`;
+
+    const c = (code ?? '').trim();
+    if (c.length > 0) return `INVITE:${c}`;
+
+    return null;
   }
 
   setSize(size: Size) {
@@ -227,15 +258,19 @@ export class ViewpicComponent implements OnInit {
   }
 
   onSelectOrClear(): void {
+    // ✅ NO navigation happens here; any navigation you saw was from Checkout leak
     if (!this.selectMode) {
       this.selectMode = true;
       this.selectModeSubject.next(true);
+      sessionStorage.setItem(this.SELECT_MODE_KEY, '1');
       return;
     }
 
     this.storeShopCart.dispatch(clearShopCart());
+
     this.selectMode = false;
     this.selectModeSubject.next(false);
+    sessionStorage.setItem(this.SELECT_MODE_KEY, '0');
   }
 
   isInCart(pictureId: string): boolean {
@@ -257,9 +292,6 @@ export class ViewpicComponent implements OnInit {
         return;
       }
 
-      // ✅ Unified selection behavior:
-      // - Paid: selectable only when forSale=true (same as before)
-      // - Free: selectable too (NEW), so user can choose which pics to download
       this.forSale$.pipe(take(1)).subscribe((isForSale) => {
         if (isForSale) {
           this.prices$.pipe(take(1)).subscribe((prices) => {
@@ -291,8 +323,7 @@ export class ViewpicComponent implements OnInit {
           return;
         }
 
-        // ✅ FREE selection (NEW): still uses cart as the selection basket
-        // size/price don't matter for free downloads
+        // FREE selection uses cart as basket
         this.cartItems$.pipe(take(1)).subscribe((items) => {
           const existing = items.find(
             (i) => i.image.pictureId === image.pictureId,
@@ -329,9 +360,11 @@ export class ViewpicComponent implements OnInit {
   }
 
   downloadSelected(): void {
-    // ✅ FE-only limit: 1 free download per inviteCode when not logged in
+    // NOTE: downloads are external URLs (zip/s3/cloudfront).
+    // Angular router must NOT be used for that.
+
     if (this.inviteCode) {
-      const isLoggedIn = !!localStorage.getItem('access_token'); // adjust if needed
+      const isLoggedIn = !!localStorage.getItem('access_token');
       if (!isLoggedIn) {
         const k = `event_free_download_used_${this.inviteCode}`;
         const alreadyUsed = localStorage.getItem(k) === '1';
@@ -343,8 +376,6 @@ export class ViewpicComponent implements OnInit {
       }
     }
 
-    // ✅ Always require a selection when selectMode is ON
-    // (Button is already disabled, but this prevents silent no-op)
     this.cartItems$.pipe(take(1)).subscribe((items) => {
       const selectedPictureIds = (items ?? [])
         .map((i) => i?.image?.pictureId)
@@ -354,17 +385,11 @@ export class ViewpicComponent implements OnInit {
 
       const hasSelection = selectedPictureIds.length > 0;
 
-      // If in selection mode, you must choose
       if (this.selectMode && !hasSelection) {
-        console.warn(
-          'downloadSelected(): selectMode is ON but nothing selected.',
-        );
+        console.warn('downloadSelected(): selectMode ON but nothing selected.');
         return;
       }
 
-      // Resolve qr for BOTH flows:
-      // - QR flow: this.qr
-      // - Invite flow: this.activeQrCode (from landing response)
       const resolvedQr =
         (this.qr && this.qr.trim().length > 0 ? this.qr.trim() : undefined) ||
         (this.activeQrCode && this.activeQrCode.trim().length > 0
@@ -372,26 +397,13 @@ export class ViewpicComponent implements OnInit {
           : undefined);
 
       if (!resolvedQr) {
-        console.warn(
-          'downloadSelected(): no resolved QR (qr/activeQrCode missing).',
-          {
-            qr: this.qr,
-            activeQrCode: this.activeQrCode,
-            inviteCode: this.inviteCode,
-          },
-        );
+        console.warn('downloadSelected(): no resolved QR', {
+          qr: this.qr,
+          activeQrCode: this.activeQrCode,
+          inviteCode: this.inviteCode,
+        });
         return;
       }
-
-      // ✅ If no selection (selectMode OFF), treat it as "download all previews"
-      // ✅ If selection exists, request zip for only those pictures (requires BE endpoint)
-      //
-      // IMPORTANT:
-      // - Your existing service method is QR-only: getPreviewZipUrlByQrCode(qr)
-      // - To support selecting specific images, you need a second endpoint/service method.
-      //
-      // We will call it if it exists: getPreviewZipUrlByQrCodeAndPictures(qr, pictureIds)
-      // If not present, we fall back to full-zip-by-qr (so you don't break downloads).
 
       const svc: any = this.pictureService as any;
 
@@ -404,20 +416,19 @@ export class ViewpicComponent implements OnInit {
           .pipe(take(1))
           .subscribe({
             next: (res: any) => {
-              if (res?.url) window.location.href = res.url;
+              if (res?.url) window.location.href = res.url; // ✅ download
             },
             error: (err: any) => console.error('downloadSelected():', err),
           });
         return;
       }
 
-      // Fallback: download all previews for that QR
       this.pictureService
         .getPreviewZipUrlByQrCode(resolvedQr)
         .pipe(take(1))
         .subscribe({
           next: (res) => {
-            if (res?.url) window.location.href = res.url;
+            if (res?.url) window.location.href = res.url; // ✅ download
           },
           error: (err) => console.error('downloadSelected():', err),
         });
@@ -425,18 +436,34 @@ export class ViewpicComponent implements OnInit {
   }
 
   goToCheckout(): void {
-    sessionStorage.setItem(
-      'returnUrl',
-      window.location.pathname + window.location.search,
-    );
-    this.router.navigate(['/checkout']);
+    // ✅ never allow entering checkout with empty cart
+    this.cartItems$.pipe(take(1)).subscribe((items) => {
+      const count = (items ?? []).length;
+
+      if (count === 0) {
+        // Optional: automatically enter select mode to make UX obvious
+        if (!this.selectMode) {
+          this.selectMode = true;
+          this.selectModeSubject.next(true);
+          sessionStorage.setItem(this.SELECT_MODE_KEY, '1');
+        }
+        return;
+      }
+
+      // ✅ Angular-safe: use router.url, not window.location
+      sessionStorage.setItem('returnUrl', this.router.url);
+      this.router.navigate(['/checkout']);
+    });
   }
 
   goToLogin(): void {
     this.router.navigate(['/login'], {
-      queryParams: {
-        returnUrl: window.location.pathname + window.location.search,
-      },
+      queryParams: { returnUrl: this.router.url },
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

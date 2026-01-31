@@ -10,10 +10,10 @@
             {{ (eventName ?? "").trim() || "Event Photos" }}
           </ng-container>
 
+          <!-- ✅ FIX: do NOT gate title behind "forSale$ | async as forSale"
+               because it can be null/undefined on first render and shows nothing. -->
           <ng-template #qrTitle>
-            <ng-container *ngIf="forSale$ | async as forSale">
-              {{ forSale ? "Photos for Sale" : "Your Photos" }}
-            </ng-container>
+            {{ (forSale$ | async) ? "Photos for Sale" : "Free Download" }}
           </ng-template>
         </div>
 
@@ -46,42 +46,32 @@
             </div>
 
             <!-- Contact ONLY when free -->
-            <ng-container *ngIf="forSale$ | async as forSale">
-              <div class="top-sub contact" *ngIf="!forSale">
-                <span *ngIf="owner.email" class="contact-item">
-                  <mat-icon class="mini">mail</mat-icon>
-                  {{ owner.email }}
-                </span>
+            <div class="top-sub contact" *ngIf="!(forSale$ | async)">
+              <span *ngIf="owner.email" class="contact-item">
+                <mat-icon class="mini">mail</mat-icon>
+                {{ owner.email }}
+              </span>
 
-                <span *ngIf="owner.phone" class="contact-item">
-                  <mat-icon class="mini">call</mat-icon>
-                  {{ owner.phone }}
-                </span>
-              </div>
-
-              <!-- ✅ Hint: hide "download available" when locked (but still allow previews) -->
-              <div class="top-hint">
-                {{
-                  forSale
-                    ? "These photos are for sale."
-                    : downloadLocked
-                      ? "You can preview photos. Login to download."
-                      : "Free previews now. Download available."
-                }}
-              </div>
-            </ng-container>
-          </ng-container>
-
-          <!-- If owner is null but not private: still show a hint (optional but avoids empty feel) -->
-          <ng-container *ngIf="!(owner$ | async)">
-            <div class="top-hint" *ngIf="!(forSale$ | async)">
-              {{
-                downloadLocked
-                  ? "You can preview photos. Login to download."
-                  : "Free previews now. Download available."
-              }}
+              <span *ngIf="owner.phone" class="contact-item">
+                <mat-icon class="mini">call</mat-icon>
+                {{ owner.phone }}
+              </span>
             </div>
           </ng-container>
+
+          <!-- ✅ SINGLE hint line (no duplicates) -->
+          <!-- RULE: For QR flow + free, do NOT show an extra "free previews" hint here
+               because the sticky "Free download" card already communicates it.
+               For EVENT flow, we still show the hint here because events can be locked. -->
+          <div class="top-hint" *ngIf="!!inviteCode">
+            {{
+              (forSale$ | async)
+                ? "These photos are for sale."
+                : downloadLocked
+                  ? "You can preview photos. Login to download."
+                  : "Free previews now. Download available."
+            }}
+          </div>
         </ng-container>
       </div>
 
@@ -119,8 +109,23 @@
 
   <!-- Everything below hidden when private -->
   <ng-container *ngIf="(isPrivateEvent$ | async) === false">
-    <!-- HERO / ACTION PANEL -->
-    <div class="hero" *ngIf="(forSale$ | async) || !downloadLocked">
+    <!-- ===========================================================
+         HERO / ACTION PANEL
+         RULES YOU ASKED:
+         1) If QR flow AND free → show only ONE card (Free download) and NO Select button
+         2) Select/Clear is allowed for:
+            - Paid (QR + Event)
+            - Free EVENT (inviteCode) so users can choose pictures for download
+         =========================================================== -->
+
+    <!-- ✅ HERO only when:
+         - forSale is true OR
+         - (free AND inviteCode AND not locked)  (event free selection)
+         We do NOT show hero for free QR flow. -->
+    <div
+      class="hero"
+      *ngIf="(forSale$ | async) || (!!inviteCode && !downloadLocked)"
+    >
       <div class="row mb-1">
         <div class="col">
           <div class="hero-hint">
@@ -128,6 +133,7 @@
               <ng-container *ngIf="forSale$ | async; else selectFree">
                 Select size and tap photos to add/remove from cart.
               </ng-container>
+
               <ng-template #selectFree>
                 Tap photos to select for download.
               </ng-template>
@@ -141,9 +147,7 @@
               </ng-container>
 
               <ng-template #freeFlow>
-                <span class="hint-strong"
-                  >Free previews now. Download available.</span
-                >
+                <span class="hint-strong">Tap Select to choose photos.</span>
               </ng-template>
             </ng-template>
           </div>
@@ -151,9 +155,16 @@
       </div>
 
       <div class="row g-2">
-        <!-- ✅ Select button shown for BOTH paid and free (unless locked) -->
-        <div class="col-12 col-md-auto">
+        <!-- ✅ Select button shown ONLY for:
+             - Paid (any flow)
+             - Free EVENT flow (inviteCode)
+             NOT shown for Free QR flow -->
+        <div
+          class="col-12 col-md-auto"
+          *ngIf="(forSale$ | async) || !!inviteCode"
+        >
           <button
+            type="button"
             mat-stroked-button
             class="btn-pill btn-secondary w-100"
             (click)="onSelectOrClear()"
@@ -224,6 +235,8 @@
       >
         <img [src]="img.previewImageUrl" alt="preview" />
 
+        <!-- ✅ Selection overlay shown ONLY when selectMode is ON.
+             (QR free flow never enables selectMode now because there’s no Select button.) -->
         <div class="img-overlay" *ngIf="selectMode$ | async">
           <div class="d-flex align-items-center gap-2">
             <mat-icon class="check size" *ngIf="isInCart(img.pictureId)">
@@ -233,7 +246,11 @@
               radio_button_unchecked
             </mat-icon>
 
-            <span class="size-badge" *ngIf="isInCart(img.pictureId)">
+            <!-- size badge only meaningful for paid -->
+            <span
+              class="size-badge"
+              *ngIf="(forSale$ | async) && isInCart(img.pictureId)"
+            >
               {{ cartSizeLabel(img.pictureId) }}
             </span>
           </div>
@@ -241,50 +258,98 @@
       </button>
     </div>
 
-    <!-- STICKY ALWAYS FOR PAID; FOR FREE only if NOT locked -->
-    <div class="sticky" *ngIf="(forSale$ | async) || !downloadLocked">
+    <!-- ===========================================================
+         STICKY BAR
+         RULES YOU ASKED:
+         - QR free: show ONLY ONE “Free download” sticky (no hero, no select)
+         - Event free: keep selection capability + respect lock
+         - Paid: checkout requires selection count > 0
+         =========================================================== -->
+
+    <!-- ✅ Show sticky when:
+         - Paid (always)
+         - Free QR flow (always)  -> NOT locked concept
+         - Free Event flow only if not locked -->
+    <div
+      class="sticky"
+      *ngIf="
+        (forSale$ | async) ||
+        (!inviteCode && !(forSale$ | async)) ||
+        (!!inviteCode && !(forSale$ | async) && !downloadLocked)
+      "
+    >
       <div class="sticky-info">
+        <!-- ✅ Title -->
         <div class="sticky-title">
-          {{
-            selectMode
-              ? selectedCount + " selected"
-              : (forSale$ | async)
-                ? "For sale"
-                : "Free download"
-          }}
+          <!-- Paid -->
+          <ng-container *ngIf="forSale$ | async; else freeStickyTitle">
+            {{ selectMode ? selectedCount + " selected" : "For sale" }}
+          </ng-container>
+
+          <!-- Free -->
+          <ng-template #freeStickyTitle>
+            <!-- QR free: always “Free download” -->
+            <ng-container *ngIf="!inviteCode; else eventFreeTitle">
+              Free download
+            </ng-container>
+            <!-- Event free: show selection count when selecting -->
+            <ng-template #eventFreeTitle>
+              {{ selectMode ? selectedCount + " selected" : "Free download" }}
+            </ng-template>
+          </ng-template>
         </div>
 
+        <!-- ✅ Subtitle -->
         <div class="sticky-sub">
-          {{
-            selectMode
-              ? (forSale$ | async)
+          <ng-container *ngIf="forSale$ | async; else freeStickySub">
+            {{
+              selectMode
                 ? "Tap photos to add/remove"
-                : "Tap photos to select"
-              : (forSale$ | async)
-                ? "High-res purchase available"
-                : "A zip file with pics will be downloaded"
-          }}
+                : "High-res purchase available"
+            }}
+          </ng-container>
+
+          <ng-template #freeStickySub>
+            <!-- QR free: no select → always zip all -->
+            <ng-container *ngIf="!inviteCode; else eventFreeSub">
+              A zip file with all pics will be downloaded
+            </ng-container>
+
+            <!-- Event free: selection supported -->
+            <ng-template #eventFreeSub>
+              {{
+                selectMode
+                  ? "Tap photos to select"
+                  : "A zip file with pics will be downloaded"
+              }}
+            </ng-template>
+          </ng-template>
         </div>
       </div>
 
-      <!-- FREE Download button ONLY if not locked -->
+      <!-- FREE Download button:
+           - QR free: always enabled (no selection needed)
+           - Event free: disabled only when in selectMode and nothing selected -->
       <button
-        *ngIf="!(forSale$ | async) && !downloadLocked"
+        *ngIf="!(forSale$ | async)"
         mat-raised-button
         class="btn-primary small"
         (click)="downloadSelected()"
-        [disabled]="selectMode && selectedCount === 0"
+        [disabled]="!!inviteCode && selectMode && selectedCount === 0"
       >
-        Download {{ selectMode ? "(" + selectedCount + ")" : "" }}
+        Download
+        {{ !!inviteCode && selectMode ? "(" + selectedCount + ")" : "" }}
       </button>
 
-      <!-- PAID Checkout button always when forSale -->
+      <!-- PAID Checkout button:
+           must be disabled when no items (always) -->
       <button
+        type="button"
         *ngIf="forSale$ | async"
         mat-raised-button
         class="btn-primary small"
         (click)="goToCheckout()"
-        [disabled]="selectMode && selectedCount === 0"
+        [disabled]="selectedCount === 0"
       >
         Checkout {{ selectMode ? "(" + selectedCount + ")" : "" }}
       </button>

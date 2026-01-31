@@ -1,5 +1,5 @@
 // checkout.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule,
@@ -11,7 +11,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { Store, select } from '@ngrx/store';
-import { map, Observable, take } from 'rxjs';
+import { map, Observable, take, Subject, takeUntil } from 'rxjs';
 import { CartItem, ShopCart } from '../models/shopCart';
 
 import {
@@ -19,7 +19,7 @@ import {
   selectShopCartState,
   selectSubtotalPrice,
 } from '../store/selectors/shopcart.selector';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CheckoutService } from '../services/checkout.service';
 import { loadStripe } from '@stripe/stripe-js';
 import { updateCheckoutForm } from '../store/actions/shopcart.actions';
@@ -41,9 +41,11 @@ import { environment } from '../../environments/environment';
   templateUrl: './checkout.component.html',
   styleUrls: ['./checkout.component.scss'],
 })
-export class CheckoutComponent implements OnInit {
+export class CheckoutComponent implements OnInit, OnDestroy {
   checkoutForm: FormGroup;
   checkoutState$: Observable<ShopCart>;
+  private destroy$ = new Subject<void>();
+
   stripePromise = loadStripe(environment.stripePublishableKey);
 
   selectedImages$: Observable<CartItem[]>;
@@ -69,14 +71,15 @@ export class CheckoutComponent implements OnInit {
 
   webCartItems: any[] = [];
 
-  // ✅ NEW: blocks double click + multiple in-flight requests
+  // ✅ blocks double click + multiple in-flight requests
   isPaying = false;
 
   constructor(
     private fb: FormBuilder,
     private store: Store<{ cart: ShopCart }>,
     private checkoutService: CheckoutService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router,
   ) {
     this.checkoutForm = this.fb.group({
       fullName: ['', Validators.required],
@@ -88,11 +91,10 @@ export class CheckoutComponent implements OnInit {
     this.checkoutState$ = this.store.pipe(select(selectShopCartState));
   }
 
-  // ✅ NEW: one safe way to return to the page the user started on
+  // ✅ Angular navigation only
   private goBackToLanding(): void {
     const returnUrl = sessionStorage.getItem('returnUrl') || '/';
-    // ✅ do NOT remove returnUrl here; keep it stable for any further back navigations
-    window.location.replace(returnUrl);
+    this.router.navigateByUrl(returnUrl);
   }
 
   ngOnInit(): void {
@@ -102,90 +104,96 @@ export class CheckoutComponent implements OnInit {
 
     // ✅ If user navigates back into /checkout from Stripe, never show checkout again
     if (cameFromStripe) {
-      // cleanup just the stripe marker
       sessionStorage.removeItem('stripeRedirected');
-
-      // hard redirect so history is clean
       this.goBackToLanding();
       return;
     }
 
     // 1) cartId mode (Flutter -> Web cart)
-    this.route.queryParamMap.subscribe((params) => {
-      this.cartId = params.get('cartId');
-      console.log('🛒 Checkout cartId from URL:', this.cartId);
+    this.route.queryParamMap
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((params) => {
+        this.cartId = params.get('cartId');
+        console.log('🛒 Checkout cartId from URL:', this.cartId);
 
-      if (this.cartId) {
-        this.checkoutService.getWebCart(this.cartId).subscribe({
-          next: (cart) => {
-            console.log('🛒 WEB CART DEBUG from API:', cart);
-            this.webCartItems = cart.items || [];
+        if (!this.cartId) return;
 
-            // ✅ If cart is empty, do NOT allow checkout page to exist
-            if (!this.webCartItems || this.webCartItems.length === 0) {
+        this.checkoutService
+          .getWebCart(this.cartId)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (cart) => {
+              console.log('🛒 WEB CART DEBUG from API:', cart);
+              this.webCartItems = cart.items || [];
+
+              // ✅ If cart is empty, do NOT allow checkout page to exist
+              if (!this.webCartItems || this.webCartItems.length === 0) {
+                this.goBackToLanding();
+                return;
+              }
+
+              const fullItems = this.webCartItems.filter(
+                (i: any) => i.size === 'full',
+              );
+              const smallItems = this.webCartItems.filter(
+                (i: any) => i.size === 'small',
+              );
+              const royaltyItems = this.webCartItems.filter(
+                (i: any) => i.size === 'royalty',
+              );
+
+              this.itemTotals = {
+                fullSizeItems: fullItems.length,
+                fullSizeSubT: fullItems.reduce(
+                  (sum: number, i: any) => sum + i.price,
+                  0,
+                ),
+                fullSizePriceEach: fullItems.length ? fullItems[0].price : 0,
+
+                smallItems: smallItems.length,
+                smallSizeSubT: smallItems.reduce(
+                  (sum: number, i: any) => sum + i.price,
+                  0,
+                ),
+                smallSizePriceEach: smallItems.length ? smallItems[0].price : 0,
+
+                royaltyItems: royaltyItems.length,
+                royaltySubT: royaltyItems.reduce(
+                  (sum: number, i: any) => sum + i.price,
+                  0,
+                ),
+                royaltyPriceEach: royaltyItems.length
+                  ? royaltyItems[0].price
+                  : 0,
+
+                itemTotal: this.webCartItems.length,
+                grandTotal: this.webCartItems.reduce(
+                  (sum: number, i: any) => sum + i.price,
+                  0,
+                ),
+              };
+            },
+            error: (err) => {
+              console.error('❌ WEB CART ERROR:', err);
               this.goBackToLanding();
-              return;
-            }
+            },
+          });
+      });
 
-            // compute totals from webCartItems
-            const fullItems = this.webCartItems.filter(
-              (i: any) => i.size === 'full'
-            );
-            const smallItems = this.webCartItems.filter(
-              (i: any) => i.size === 'small'
-            );
-            const royaltyItems = this.webCartItems.filter(
-              (i: any) => i.size === 'royalty'
-            );
-
-            this.itemTotals = {
-              fullSizeItems: fullItems.length,
-              fullSizeSubT: fullItems.reduce(
-                (sum: number, i: any) => sum + i.price,
-                0
-              ),
-              fullSizePriceEach: fullItems.length ? fullItems[0].price : 0,
-
-              smallItems: smallItems.length,
-              smallSizeSubT: smallItems.reduce(
-                (sum: number, i: any) => sum + i.price,
-                0
-              ),
-              smallSizePriceEach: smallItems.length ? smallItems[0].price : 0,
-
-              royaltyItems: royaltyItems.length,
-              royaltySubT: royaltyItems.reduce(
-                (sum: number, i: any) => sum + i.price,
-                0
-              ),
-              royaltyPriceEach: royaltyItems.length ? royaltyItems[0].price : 0,
-
-              itemTotal: this.webCartItems.length,
-              grandTotal: this.webCartItems.reduce(
-                (sum: number, i: any) => sum + i.price,
-                0
-              ),
-            };
-          },
-          error: (err) => {
-            console.error('❌ WEB CART ERROR:', err);
-            // ✅ If web cart can't load, don't leave them on dead checkout
-            this.goBackToLanding();
-          },
-        });
-      }
-    });
-
-    // keep store form in sync
-    this.checkoutForm.valueChanges.subscribe((value) => {
-      this.store.dispatch(updateCheckoutForm({ formValues: value }));
-    });
+    // keep store form in sync (✅ leak fixed)
+    this.checkoutForm.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((value) => {
+        this.store.dispatch(updateCheckoutForm({ formValues: value }));
+      });
 
     // 2) QR flow totals (ONLY when cartId is not present)
+    // ✅ IMPORTANT: this subscription MUST die on destroy, otherwise it will keep firing
     this.checkoutState$
       .pipe(
+        takeUntil(this.destroy$),
         map((cartState) => {
-          if (this.cartId) return; // cart mode totals handled above
+          if (this.cartId) return;
 
           // ✅ If QR cart is empty, do NOT allow checkout page to exist
           if (!cartState?.items || cartState.items.length === 0) {
@@ -196,39 +204,38 @@ export class CheckoutComponent implements OnInit {
           const fullItems = cartState.items.filter((i) => i.size === 'full');
           const smallItems = cartState.items.filter((i) => i.size === 'small');
           const royaltyItems = cartState.items.filter(
-            (i) => i.size === 'royalty'
+            (i) => i.size === 'royalty',
           );
 
-          // ✅ IMPORTANT: use cartState.items here (NOT webCartItems)
           this.itemTotals = {
             fullSizeItems: fullItems.length,
             fullSizeSubT: fullItems.reduce(
               (sum: number, i: any) => sum + i.price,
-              0
+              0,
             ),
             fullSizePriceEach: fullItems.length ? fullItems[0].price : 0,
 
             smallItems: smallItems.length,
             smallSizeSubT: smallItems.reduce(
               (sum: number, i: any) => sum + i.price,
-              0
+              0,
             ),
             smallSizePriceEach: smallItems.length ? smallItems[0].price : 0,
 
             royaltyItems: royaltyItems.length,
             royaltySubT: royaltyItems.reduce(
               (sum: number, i: any) => sum + i.price,
-              0
+              0,
             ),
             royaltyPriceEach: royaltyItems.length ? royaltyItems[0].price : 0,
 
             itemTotal: cartState.items.length,
             grandTotal: cartState.items.reduce(
               (sum: number, i: any) => sum + i.price,
-              0
+              0,
             ),
           };
-        })
+        }),
       )
       .subscribe();
   }
@@ -236,26 +243,22 @@ export class CheckoutComponent implements OnInit {
   async pay(event: Event) {
     event.preventDefault();
 
-    // ✅ block double-click / spam-click
     if (this.isPaying) return;
     this.isPaying = true;
 
-    // ✅ Always ensure we have a returnUrl (landing page) before leaving site
+    // ✅ Angular-safe: use router.url, not window.location
     sessionStorage.setItem(
       'returnUrl',
-      sessionStorage.getItem('returnUrl') ||
-        window.location.pathname + window.location.search
+      sessionStorage.getItem('returnUrl') || this.router.url,
     );
 
-    // ✅ 1) APP CART FLOW (Flutter → web): we have ?cartId=...
+    // ✅ 1) APP CART FLOW (Flutter → web): ?cartId=...
     if (this.cartId) {
-      // if invalid form, re-enable button
       if (this.checkoutForm.invalid) {
         this.isPaying = false;
         return;
       }
 
-      // ✅ Safety: don't allow pay if cart failed to load / empty
       if (!this.webCartItems || this.webCartItems.length === 0) {
         this.isPaying = false;
         this.goBackToLanding();
@@ -275,12 +278,10 @@ export class CheckoutComponent implements OnInit {
 
           const stripe = await this.stripePromise;
 
-          // ✅ mark that we left for Stripe so /checkout can bounce safely if we come back
           sessionStorage.setItem('stripeRedirected', '1');
 
           const result = await stripe?.redirectToCheckout({ sessionId });
 
-          // ✅ if redirect fails (popup blocker / network), unlock button
           if (result?.error) {
             console.error(result.error);
             this.isPaying = false;
@@ -298,7 +299,6 @@ export class CheckoutComponent implements OnInit {
     // ✅ 2) QR FLOW
     this.checkoutState$.pipe(take(1)).subscribe({
       next: (state) => {
-        // ✅ Safety: don't allow pay if empty cart
         if (!state?.items || state.items.length === 0) {
           this.isPaying = false;
           this.goBackToLanding();
@@ -315,14 +315,12 @@ export class CheckoutComponent implements OnInit {
           next: async (data) => {
             const stripe = await this.stripePromise;
 
-            // ✅ mark that we left for Stripe so /checkout can bounce safely if we come back
             sessionStorage.setItem('stripeRedirected', '1');
 
             const result = await stripe?.redirectToCheckout({
               sessionId: data.sessionId,
             });
 
-            // ✅ if redirect fails, unlock button
             if (result?.error) {
               console.error(result.error);
               this.isPaying = false;
@@ -339,5 +337,10 @@ export class CheckoutComponent implements OnInit {
         this.isPaying = false;
       },
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
