@@ -5,6 +5,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+
 // ✅ NEW: ngrx store + clear action
 import { Store } from '@ngrx/store';
 import { clearShopCart } from '../store/actions/shopcart.actions'; // <-- keep your path
@@ -17,7 +19,13 @@ import { PictureService } from '../services/picture.service';
   standalone: true,
   templateUrl: './checkout-success.component.html',
   styleUrls: ['./checkout-success.component.scss'],
-  imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule],
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSnackBarModule,
+  ],
 })
 export class CheckoutSuccessComponent implements OnInit, OnDestroy {
   sessionId: string | null = null;
@@ -46,6 +54,7 @@ export class CheckoutSuccessComponent implements OnInit, OnDestroy {
     private pictureService: PictureService,
     private store: Store,
     private router: Router,
+    private snackBar: MatSnackBar,
   ) {}
 
   ngOnInit(): void {
@@ -61,7 +70,9 @@ export class CheckoutSuccessComponent implements OnInit, OnDestroy {
     this.returnUrl = sessionStorage.getItem('returnUrl') || '/';
 
     // ✅ remove query params from history so refresh/back doesn’t re-run success logic
-    history.replaceState({}, '', '/checkout-success');
+    // Keep current path, drop query string
+    const cleanPath = window.location.pathname;
+    history.replaceState({}, '', cleanPath);
 
     // ✅ IMPORTANT: trap phone back button so user doesn't land back on Stripe
     history.pushState({ fromSuccess: true }, '', window.location.href);
@@ -123,6 +134,24 @@ export class CheckoutSuccessComponent implements OnInit, OnDestroy {
     this.router.navigateByUrl(this.returnUrl);
   };
 
+  // ✅ NEW: download helper (PROD-safe, no router)
+  private startDownload(url: string): void {
+    try {
+      const a = document.createElement('a');
+      a.href = url;
+      a.rel = 'noopener';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      this.snackBar.open('Download started', 'OK', { duration: 2500 });
+    } catch {
+      // fallback
+      window.location.assign(url);
+    }
+  }
+
   // ✅ NEW: remove only the cart slice from the persisted appState
   private clearPersistedCart(): void {
     try {
@@ -179,13 +208,12 @@ export class CheckoutSuccessComponent implements OnInit, OnDestroy {
           // ✅ DESKTOP: auto-start download is fine
           if (!this.isMobile) {
             this.downloadStarted = true;
-            this.router.navigateByUrl(this.downloadUrl);
+            this.startDownload(this.downloadUrl);
             return;
           }
 
           // ✅ MOBILE: do NOT auto-download.
-          // Mobile browsers require a user gesture and show scary prompts.
-          // User will tap "Download again" (which is a direct gesture).
+          // User will tap "Download again" (gesture)
           this.downloadStarted = false;
         },
         error: (err) => {
@@ -212,8 +240,8 @@ export class CheckoutSuccessComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // ✅ On mobile, this click is the user gesture → best chance to avoid popup blockers
+    // ✅ On mobile, this click is the user gesture → best chance to avoid blockers
     this.downloadStarted = true;
-    this.router.navigateByUrl(this.downloadUrl);
+    this.startDownload(this.downloadUrl);
   }
 }

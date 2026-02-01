@@ -26,7 +26,9 @@
     "@ngrx/router-store": "^19.1.0",
     "@ngrx/store": "^19.1.0",
     "@ngrx/store-devtools": "^19.1.0",
+    "@stripe/stripe-js": "^8.7.0",
     "bootstrap": "^5.3.3",
+    "ngx-stripe": "^19.8.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"

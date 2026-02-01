@@ -23,16 +23,25 @@ export class PictureService {
     );
   }
 
+  // ✅ Step 1: FREE preview ZIP for selected pictures only
+  getPreviewZipUrlByQrCodeAndPictures(
+    qrCode: string,
+    pictureIds: string[],
+  ): Observable<{ url: string }> {
+    return this.http.post<{ url: string }>(
+      `${API.pictures.byQr(qrCode)}/download-preview-zip-selected`,
+      { pictureIds },
+    );
+  }
+
   // (optional) if you still want it later for UI listing; NOT needed for download
   getPaidPictures(sessionId: string): Observable<any> {
-    /////////// ${environment.apiBaseUrl}/api/pictures/paid-pictures/${sessionId}`,
     return this.http.get<any>(API.pictures.paidPictures(sessionId));
   }
 
   // ✅ NEW: Paid ORIGINALS ZIP by Stripe session id (cs_...)
   // Backend should return: { url: "https://....zip" }
   getPaidZipUrl(sessionId: string): Observable<{ url: string }> {
-    ////////*** API.pictures.paidZip(sessionId) = api/pictures/paid-pictures/${sessionId}/download-zip
     return this.http.get<{ url: string }>(API.pictures.paidZip(sessionId));
   }
 }

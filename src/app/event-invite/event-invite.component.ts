@@ -293,6 +293,7 @@ export class EventInviteComponent implements OnInit {
   }
 
   downloadSelected(): void {
+    console.log('Download selected clicked');
     // events flow: keep your existing zip logic later.
     // For now leave it same as viewpics: do nothing or hook to your endpoint when ready.
   }
