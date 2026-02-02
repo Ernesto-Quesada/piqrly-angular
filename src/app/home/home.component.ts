@@ -28,7 +28,7 @@ export class HomeComponent {
   heroImages = [
     '/assets/landing/granada.jpg',
     '/assets/landing/machupichu.jpg',
-    '/assets/landing/qbros.jpg',
+    '/assets/landing/theqbros.jpg',
   ];
 
   // seconds per slide
