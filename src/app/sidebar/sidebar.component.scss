@@ -100,7 +100,7 @@
 }
 
 .page {
-  padding: 16px;
+  // padding: 16px;
 }
 
 /* GLOBAL HEADER */
@@ -114,6 +114,7 @@
 
 /* ICON BUTTON (INLINE, NOT FLOATING) */
 .icon-bubble {
+  background-color: var(--app-primary) !important;
   width: 44px;
   height: 44px;
   min-width: 44px;

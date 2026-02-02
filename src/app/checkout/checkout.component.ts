@@ -45,6 +45,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   checkoutForm: FormGroup;
   checkoutState$: Observable<ShopCart>;
   private destroy$ = new Subject<void>();
+  private returnTo: string | null = null;
 
   // Keeping this to minimize changes; no longer required once you redirect by URL.
   stripePromise = loadStripe(environment.stripePublishableKey);
@@ -90,6 +91,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     this.selectedImages$ = this.store.pipe(select(selectSelectedPictures));
     this.totalPrice$ = this.store.pipe(select(selectSubtotalPrice));
     this.checkoutState$ = this.store.pipe(select(selectShopCartState));
+    this.returnTo = this.route.snapshot.queryParamMap.get('returnTo');
   }
 
   // ✅ Angular navigation only
@@ -332,6 +334,53 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     });
   }
 
+  goBackToViewPics() {
+    // 1) If checkout was opened with a returnTo route (best)
+    if (this.returnTo && this.returnTo.trim().length > 0) {
+      this.router.navigateByUrl(this.returnTo);
+      return;
+    }
+
+    // 2) fallback: last viewpics QR
+    const lastQr = localStorage.getItem('last_viewpics_qr');
+    if (lastQr && lastQr.trim().length > 0) {
+      this.router.navigate(['/viewpics', lastQr.trim()]);
+      return;
+    }
+
+    // 3) fallback: browser back
+    if (window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+
+    // 4) final fallback
+    this.router.navigate(['/']);
+  }
+  // Prefer preview/thumb url; fallback safely
+  getCheckoutThumb(item: any): string {
+    // cart flow item might have:
+    // item.previewImageUrl OR item.imageUrl
+    if (item?.previewImageUrl) return item.previewImageUrl;
+    if (item?.imageUrl) return item.imageUrl;
+
+    // qrFlow item shape:
+    // image.image.previewImageUrl or image.image.imageUrl
+    if (item?.image?.previewImageUrl) return item.image.previewImageUrl;
+    if (item?.image?.imageUrl) return item.image.imageUrl;
+
+    // sometimes you used "previewImageUrls[0]" in other places
+    if (Array.isArray(item?.previewImageUrls) && item.previewImageUrls[0])
+      return item.previewImageUrls[0];
+
+    return '';
+  }
+
+  onThumbError(ev: Event) {
+    const img = ev.target as HTMLImageElement;
+    // optional fallback asset (create one)
+    img.src = '/assets/img/placeholder-thumb.png';
+  }
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();

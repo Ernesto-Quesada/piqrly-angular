@@ -1,0 +1,308 @@
+<div class="home">
+  <!-- HERO -->
+  <section class="hero">
+    <!-- ✅ Background slideshow (FADE style) -->
+    <div class="hero-bg" aria-hidden="true">
+      <!--
+        ✅ Put your images here:
+        src/assets/landing/hero-1.jpg
+        src/assets/landing/hero-2.jpg
+        src/assets/landing/hero-3.jpg
+      -->
+      <div
+        class="bg-slide"
+        *ngFor="let img of heroImages; let i = index"
+        [style.backgroundImage]="'url(' + img + ')'"
+        [style.animationDelay]="i * slideDuration + 's'"
+      ></div>
+    </div>
+
+    <!-- overlay stays -->
+    <div class="hero-overlay"></div>
+
+    <div class="container hero-content">
+      <!-- LEFT -->
+      <div class="hero-left">
+        <!-- ✅ Blurred contrast layer behind text -->
+        <div class="hero-left-glass">
+          <div class="pill">
+            <mat-icon class="pill-icon">qr_code_2</mat-icon>
+            <span>QR photo sharing + instant viewing</span>
+          </div>
+
+          <h1 class="hero-title">
+            Turn event photos into a
+            <span class="accent">scan → view → buy</span>
+            experience.
+          </h1>
+
+          <p class="hero-subtitle">
+            Piqrly lets guests scan a QR code to preview photos immediately.
+            Free previews when allowed, or checkout for high-res downloads when
+            photos are for sale.
+          </p>
+
+          <div class="hero-actions">
+            <button
+              mat-flat-button
+              class="btn-primary"
+              (click)="scrollTo('enter-code')"
+            >
+              View Photos
+              <mat-icon>arrow_downward</mat-icon>
+            </button>
+
+            <button
+              mat-stroked-button
+              class="btn-ghost"
+              (click)="scrollTo('how-it-works')"
+            >
+              How it works
+            </button>
+          </div>
+
+          <div class="trust-row">
+            <div class="trust-item">
+              <mat-icon>bolt</mat-icon><span>Fast preview loading</span>
+            </div>
+            <div class="trust-item">
+              <mat-icon>lock</mat-icon><span>Secure checkout</span>
+            </div>
+            <div class="trust-item">
+              <mat-icon>phone_iphone</mat-icon><span>Mobile-friendly</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="hero-right d-none d-md-flex">
+        <mat-card class="glass-card">
+          <div class="card-title">Find your photos</div>
+          <div class="card-subtitle">Enter your code to open your gallery.</div>
+
+          <div class="card-forms">
+            <!-- QR -->
+            <div class="mini-block">
+              <div class="mini-title">
+                <mat-icon>image</mat-icon>
+                <span>QR Gallery</span>
+              </div>
+
+              <form class="mini-form" [formGroup]="qrForm" (ngSubmit)="goQr()">
+                <input
+                  class="code-input"
+                  formControlName="qrid"
+                  placeholder="Enter QR code (example: 1c77e30b...)"
+                  autocomplete="off"
+                />
+                <button mat-flat-button class="btn-primary-sm" type="submit">
+                  Go
+                </button>
+              </form>
+
+              <div class="error" *ngIf="qrInvalid()">
+                Please enter a valid QR code.
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Invite -->
+            <div class="mini-block">
+              <div class="mini-title">
+                <mat-icon>event</mat-icon>
+                <span>Event Invite</span>
+              </div>
+
+              <form
+                class="mini-form"
+                [formGroup]="inviteForm"
+                (ngSubmit)="goInvite()"
+              >
+                <input
+                  class="code-input"
+                  formControlName="code"
+                  placeholder="Enter invite code"
+                  autocomplete="off"
+                />
+                <button mat-flat-button class="btn-primary-sm" type="submit">
+                  Open
+                </button>
+              </form>
+
+              <div class="error" *ngIf="inviteInvalid()">
+                Please enter a valid invite code.
+              </div>
+            </div>
+          </div>
+
+          <div class="fineprint">
+            By continuing, you agree to Terms & Privacy.
+          </div>
+        </mat-card>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENTER CODE -->
+  <section class="enter" id="enter-code">
+    <div class="container">
+      <div class="enter-grid">
+        <div class="enter-copy">
+          <h2>Open your gallery in seconds</h2>
+          <p>
+            If you received a QR code or an event invite, enter it here and
+            you’ll land directly on the photo gallery.
+          </p>
+
+          <div class="enter-bullets">
+            <div class="bullet">
+              <mat-icon>check_circle</mat-icon><span>Preview instantly</span>
+            </div>
+            <div class="bullet">
+              <mat-icon>check_circle</mat-icon
+              ><span>Buy high-res when available</span>
+            </div>
+            <div class="bullet">
+              <mat-icon>check_circle</mat-icon
+              ><span>Download to your phone</span>
+            </div>
+          </div>
+        </div>
+
+        <mat-card class="enter-card">
+          <div class="enter-card-title">Enter code</div>
+
+          <div class="stack">
+            <div class="label">QR Gallery</div>
+            <form class="stack-row" [formGroup]="qrForm" (ngSubmit)="goQr()">
+              <input
+                class="code-input lg"
+                formControlName="qrid"
+                placeholder="QR code"
+              />
+              <button mat-flat-button class="btn-primary" type="submit">
+                View
+                <mat-icon>arrow_forward</mat-icon>
+              </button>
+            </form>
+
+            <div class="label">Event Invite</div>
+            <form
+              class="stack-row"
+              [formGroup]="inviteForm"
+              (ngSubmit)="goInvite()"
+            >
+              <input
+                class="code-input lg"
+                formControlName="code"
+                placeholder="Invite code"
+              />
+              <button mat-flat-button class="btn-primary" type="submit">
+                Open
+                <mat-icon>arrow_forward</mat-icon>
+              </button>
+            </form>
+
+            <div class="hint">
+              Tip: Invite links are usually short; QR codes are often longer.
+            </div>
+          </div>
+        </mat-card>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how" id="how-it-works">
+    <div class="container">
+      <div class="section-head">
+        <h2>How it works</h2>
+        <p>Simple for guests. Powerful for photographers.</p>
+      </div>
+
+      <div class="how-grid">
+        <mat-card class="how-card">
+          <div class="how-icon"><mat-icon>qr_code_scanner</mat-icon></div>
+          <div class="how-title">1) Scan</div>
+          <div class="how-text">
+            Guests scan a QR code on-site or open an invite link.
+          </div>
+        </mat-card>
+
+        <mat-card class="how-card">
+          <div class="how-icon"><mat-icon>photo_library</mat-icon></div>
+          <div class="how-title">2) Preview</div>
+          <div class="how-text">
+            Photos load fast on mobile, with clean previews and a smooth viewer.
+          </div>
+        </mat-card>
+
+        <mat-card class="how-card">
+          <div class="how-icon"><mat-icon>shopping_cart</mat-icon></div>
+          <div class="how-title">3) Checkout</div>
+          <div class="how-text">
+            When photos are for sale, guests choose options and pay securely.
+          </div>
+        </mat-card>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features">
+    <div class="container">
+      <div class="feature-strip">
+        <div class="feature">
+          <mat-icon>auto_awesome</mat-icon>
+          <div>
+            <div class="feature-title">Beautiful gallery</div>
+            <div class="feature-sub">
+              Modern UI that makes photos feel premium.
+            </div>
+          </div>
+        </div>
+
+        <div class="feature">
+          <mat-icon>verified_user</mat-icon>
+          <div>
+            <div class="feature-title">Controlled downloads</div>
+            <div class="feature-sub">
+              Free previews, paid downloads when required.
+            </div>
+          </div>
+        </div>
+
+        <div class="feature">
+          <mat-icon>support_agent</mat-icon>
+          <div>
+            <div class="feature-title">Event-friendly</div>
+            <div class="feature-sub">
+              Built for QR sharing at social events.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <div class="brand-inline">
+          <div class="brand-title">Piqrly</div>
+        </div>
+        <div class="footer-note">Photos & QR sharing for events.</div>
+      </div>
+
+      <div class="footer-links">
+        <a class="footer-link" routerLink="/public">Home</a>
+        <a class="footer-link">Terms</a>
+        <a class="footer-link">Privacy</a>
+        <a class="footer-link">Contact</a>
+      </div>
+    </div>
+  </footer>
+</div>

@@ -55,3 +55,60 @@
   .bkg-i {
     background-color: #cfcfcf;
   }
+  .checkout-grid {
+  .checkout-item-card {
+    border-radius: 12px;
+  }
+}
+
+.checkout-thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex: 0 0 auto;
+}
+
+.line1 {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.line2 {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.back-btn mat-icon {
+  font-size: 28px;
+  line-height: 28px;
+}
+.back-to-photos-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+
+  color: var( --app-text-main); /* ✅ uses your Bootstrap primary */
+  text-decoration: none;
+}
+
+.back-to-photos-btn:hover {
+  opacity: 0.85;
+}
+
+.back-icon {
+  font-size: 28px;
+  line-height: 28px;
+  color: var(--app-primary);
+  height: 28px;
+}
+
+.back-text {
+  font-size: 13px;
+  font-weight: 600;
+}
