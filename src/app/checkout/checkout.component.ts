@@ -46,6 +46,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   checkoutState$: Observable<ShopCart>;
   private destroy$ = new Subject<void>();
 
+  // Keeping this to minimize changes; no longer required once you redirect by URL.
   stripePromise = loadStripe(environment.stripePublishableKey);
 
   selectedImages$: Observable<CartItem[]>;
@@ -95,6 +96,20 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   private goBackToLanding(): void {
     const returnUrl = sessionStorage.getItem('returnUrl') || '/';
     this.router.navigateByUrl(returnUrl);
+  }
+
+  // ✅ NEW: shared helper (keeps changes small)
+  private redirectToStripeCheckoutUrl(data: any): void {
+    const url = data?.url;
+    if (typeof url === 'string' && url.trim().length > 0) {
+      sessionStorage.setItem('stripeRedirected', '1');
+      // Use replace so back button doesn't land back on /checkout
+      window.location.replace(url);
+      return;
+    }
+
+    console.error('❌ Missing Checkout URL in response:', data);
+    this.isPaying = false;
   }
 
   ngOnInit(): void {
@@ -188,7 +203,6 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       });
 
     // 2) QR flow totals (ONLY when cartId is not present)
-    // ✅ IMPORTANT: this subscription MUST die on destroy, otherwise it will keep firing
     this.checkoutState$
       .pipe(
         takeUntil(this.destroy$),
@@ -273,19 +287,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
       this.checkoutService.createWebCartCheckoutSession(payload).subscribe({
         next: async (data) => {
-          const sessionId = data.sessionId;
-          console.log('🧾 Web-cart Session ID:', sessionId);
-
-          const stripe = await this.stripePromise;
-
-          sessionStorage.setItem('stripeRedirected', '1');
-
-          const result = await stripe?.redirectToCheckout({ sessionId });
-
-          if (result?.error) {
-            console.error(result.error);
-            this.isPaying = false;
-          }
+          // ✅ NEW: redirect by URL (Stripe removed redirectToCheckout in newer typings)
+          this.redirectToStripeCheckoutUrl(data);
         },
         error: (err) => {
           console.error('❌ createWebCartCheckoutSession failed:', err);
@@ -313,18 +316,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
         this.checkoutService.createCheckoutSession(payload).subscribe({
           next: async (data) => {
-            const stripe = await this.stripePromise;
-
-            sessionStorage.setItem('stripeRedirected', '1');
-
-            const result = await stripe?.redirectToCheckout({
-              sessionId: data.sessionId,
-            });
-
-            if (result?.error) {
-              console.error(result.error);
-              this.isPaying = false;
-            }
+            // ✅ NEW: redirect by URL (Stripe removed redirectToCheckout in newer typings)
+            this.redirectToStripeCheckoutUrl(data);
           },
           error: (err) => {
             console.error('❌ createCheckoutSession failed:', err);
