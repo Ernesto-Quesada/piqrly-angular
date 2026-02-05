@@ -6,7 +6,7 @@
     "start": "ng serve",
     "fone": "ng serve --host 192.168.170.189",
     "runnAll": "ng serve --host 0.0.0.0 --port 4200",
-    "build": "ng build",
+    "build": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
