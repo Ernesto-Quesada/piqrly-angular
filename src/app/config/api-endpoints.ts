@@ -12,7 +12,8 @@ export const API = {
       `${environment.apiBaseUrl}/api/pictures/paid-pictures/${sessionId}/download-zip`,
   },
   events: {
-    byEventQr: (qr: string) => `${environment.apiBaseUrl}/api/share/${qr}/data`,
+    byEventQr: (qr: string) =>
+      `${environment.apiBaseUrl}/api/events/invite/${qr}`,
 
     // paidEventPictures: (sessionId: string) =>
     //   `${environment.apiBaseUrl}/api/pictures/paid-pictures/${sessionId}`,
