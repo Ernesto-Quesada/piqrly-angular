@@ -229,8 +229,8 @@
     <div class="grid" *ngIf="images$ | async as images">
       <button
         class="img-card mat-elevation-z2"
-        *ngFor="let img of images"
-        (click)="openPreview(img)"
+        *ngFor="let img of images; let i = index"
+        (click)="openPreview(img, i)"
         type="button"
       >
         <img [src]="img.previewImageUrl" alt="preview" />

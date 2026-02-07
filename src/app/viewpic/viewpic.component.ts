@@ -1,6 +1,5 @@
 // viewpic.component.ts
 
-// viewpic.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -262,15 +261,18 @@ export class ViewpicComponent implements OnInit, OnDestroy {
     this.selectedSize = size;
   }
 
-  openImageModal(image: Image): void {
-    this.dialog.open(ImageModalComponent, {
-      data: { image },
-      // width: window.innerWidth < 768 ? '90vw' : '600px',
-      backdropClass: 'custom-backdrop',
-      panelClass: 'image-modal-fullscreen',
-      width: '100vw',
-      height: '100vh',
-      maxWidth: '100vw',
+  // ✅ ONLY CHANGE: now opens as a gallery by passing images + startIndex
+  openImageModal(image: Image, startIndex: number): void {
+    this.images$.pipe(take(1)).subscribe((images) => {
+      this.dialog.open(ImageModalComponent, {
+        data: { images, startIndex: startIndex, image },
+        // width: window.innerWidth < 768 ? '90vw' : '600px',
+        backdropClass: 'custom-backdrop',
+        panelClass: 'image-modal-fullscreen',
+        width: '100vw',
+        height: '100vh',
+        maxWidth: '100vw',
+      });
     });
   }
 
@@ -301,10 +303,11 @@ export class ViewpicComponent implements OnInit, OnDestroy {
     return 'Royalty';
   }
 
-  openPreview(image: Image): void {
+  // ✅ ONLY CHANGE: pass index through so modal knows startIndex
+  openPreview(image: Image, index: number): void {
     this.selectMode$.pipe(take(1)).subscribe((selecting) => {
       if (!selecting) {
-        this.openImageModal(image);
+        this.openImageModal(image, index);
         return;
       }
 

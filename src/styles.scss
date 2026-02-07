@@ -14,7 +14,6 @@
   /* Text */
   --app-text-main: #0f172a;
   --app-text-muted: #64748b;
-  
 
   /* Icons */
   --app-icon-default: var(--app-text-muted);
@@ -62,9 +61,11 @@ body {
 .material-icons-outlined {
   color: var(--app-icon-on-primary);
 }
+
 .mat-icon {
-  color: var(--icon-cta)
+  color: var(--icon-cta);
 }
+
 a .mat-icon {
   color: var(--app-icon-default) !important;
 }
@@ -149,17 +150,19 @@ mat-sidenav,
   color: #fff !important;
   border-radius: var(--app-radius-pill) !important;
 }
+
 .btn-secondary {
   background: var(--app-bg) !important;
   color: var(--app-primary) !important;
   border-radius: var(--app-radius-pill) !important;
+
   .mat-icon {
     color: var(--app-primary) !important;
-  } 
+  }
 }
 
 .btn-primary .mat-icon {
-  color: var(--icon-cta) !important;//buttons
+  color: var(--icon-cta) !important; //buttons
 }
 
 /* Useful for your round icon buttons (menu/cart bubbles) */
@@ -168,6 +171,11 @@ mat-sidenav,
   //border-radius: 50%;
   box-shadow: var(--app-shadow-md);
 }
+
+/* ================================
+   EXISTING FULLSCREEN DIALOG CSS
+   (left as-is to avoid breaking anything)
+   ================================ */
 .image-modal-fullscreen .mat-mdc-dialog-surface {
   padding: 0 !important;
   border-radius: 0 !important;
@@ -184,4 +192,169 @@ mat-sidenav,
   margin: 0 !important;
   max-height: 100vh !important;
   overflow: hidden !important;
+}
+
+/* Fullscreen dialog panel */
+.image-modal-fullscreen {
+  /* Remove default constraints from MatDialog overlay pane */
+  max-width: 100vw !important;
+  width: 100vw !important;
+  height: 100vh !important;
+}
+
+/* Angular Material (MDC) dialog surface */
+.image-modal-fullscreen .mat-mdc-dialog-container,
+.image-modal-fullscreen .mat-mdc-dialog-container .mdc-dialog__surface {
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  background: #000 !important;
+
+  /* IMPORTANT: prevent the dialog itself from scrolling vertically */
+  overflow: hidden !important;
+
+  /* Ensure it actually fills the viewport */
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+}
+
+/* ================================
+   BOOTSTRAP-FRIENDLY SIMPLE CAROUSEL (NO MATERIAL REQUIRED)
+   Use this for swipe left/right with scroll-snap.
+   ================================ */
+
+/* If you use a Bootstrap modal for fullscreen viewer, these help it behave like a true fullscreen canvas */
+.modal.piqrly-fullscreen-modal .modal-dialog {
+  max-width: 100vw;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+}
+
+.modal.piqrly-fullscreen-modal .modal-content {
+  width: 100vw;
+  height: 100vh;
+  border: 0;
+  border-radius: 0;
+  background: #000;
+}
+
+/* Optional: darker backdrop when using Bootstrap modal */
+.modal-backdrop.show.piqrly-dark-backdrop {
+  opacity: 0.95;
+}
+
+/* ✅ Simple swipe carousel container (horizontal scroll snap) */
+.simple-carousel {
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+
+  display: flex;
+  flex-wrap: nowrap;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+
+  /* Force swipe to be horizontal */
+  touch-action: pan-x;
+
+  /* Avoid page bounce stealing gesture */
+  overscroll-behavior: contain;
+
+  scrollbar-width: none; /* Firefox */
+}
+
+.simple-carousel::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+/* Each slide = full screen */
+.simple-carousel-slide {
+  flex: 0 0 100vw;
+  width: 100vw;
+  height: 100vh;
+
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Image inside slide */
+.simple-carousel-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+
+  user-select: none;
+  -webkit-user-drag: none;
+
+  /* keep swipe gestures responsive */
+  touch-action: pan-x;
+}
+
+/* Optional dots (you can render these with *ngFor) */
+.simple-carousel-dots {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 14px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  z-index: 2000;
+  pointer-events: auto;
+}
+
+.simple-carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  opacity: 0.4;
+  background: #fff;
+  cursor: pointer;
+}
+
+.simple-carousel-dot.active {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+/* Optional top/bottom overlays (works in bootstrap modal or plain fullscreen div) */
+.simple-carousel-topbar,
+.simple-carousel-bottombar {
+  position: fixed;
+  left: 0;
+  width: 100%;
+  z-index: 2001;
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  pointer-events: none; /* so swipe still works behind it */
+}
+
+.simple-carousel-topbar {
+  top: 0;
+  justify-content: flex-start;
+}
+
+.simple-carousel-bottombar {
+  bottom: 0;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Allow buttons inside bars to be clickable */
+.simple-carousel-topbar button,
+.simple-carousel-bottombar button {
+  pointer-events: auto;
 }

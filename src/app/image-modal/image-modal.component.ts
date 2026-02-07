@@ -5,21 +5,17 @@ import {
   ViewChild,
   ElementRef,
 } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
 import { Store } from '@ngrx/store';
 import { addImageToCart } from '../store/actions/shopcart.actions';
 import { ShopCart } from './../models/shopCart';
-import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
-
 import { Price, Image } from '../models/response';
 
 @Component({
   selector: 'image-modal',
-  imports: [MatCardModule, MatIconModule, MatButtonModule, CommonModule],
   standalone: true,
+  imports: [CommonModule],
   templateUrl: './image-modal.component.html',
   styleUrl: './image-modal.component.scss',
 })
@@ -48,7 +44,6 @@ export class ImageModalComponent implements AfterViewInit {
     },
     private store: Store<{ shopcart: ShopCart }>,
   ) {
-    // ✅ prefer new data format
     this.images =
       data.images && data.images.length
         ? data.images
@@ -68,7 +63,7 @@ export class ImageModalComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    // ✅ jump to tapped image
+    // jump to tapped image
     setTimeout(() => {
       this.scrollToIndex(this.startIndex, 'auto');
       this.currentIndex = this.startIndex;

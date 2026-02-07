@@ -1,24 +1,20 @@
 <!-- Top fixed icons -->
-<div class="dialog-top-icons">
-  <button mat-icon-button (click)="closeModal()" class="back-button">
-    <mat-icon class="back-button-icon">arrow_back</mat-icon>
-  </button>
+<div class="simple-topbar">
+  <button type="button" class="icon-btn" (click)="closeModal()">←</button>
 </div>
 
-<!-- ✅ Swipe strip -->
-<div class="modal-content">
-  <div class="swipe-strip" #strip (scroll)="onStripScroll()">
-    <div class="slide" *ngFor="let img of images; let i = index">
-      <mat-card class="modal-card">
-        <img [src]="img.previewImageUrl" class="full-image" alt="Image" />
-      </mat-card>
+<!-- ✅ Simple swipe carousel -->
+<div class="simple-modal">
+  <div class="simple-strip" #strip (scroll)="onStripScroll()">
+    <div class="simple-slide" *ngFor="let img of images; let i = index">
+      <img [src]="img.previewImageUrl" class="simple-image" alt="Image" />
     </div>
   </div>
 
   <!-- ✅ Dots indicator -->
-  <div class="dots" *ngIf="images.length > 1">
+  <div class="simple-dots" *ngIf="images.length > 1">
     <span
-      class="dot"
+      class="simple-dot"
       *ngFor="let _ of images; let i = index"
       [class.active]="i === currentIndex"
       (click)="goTo(i)"
@@ -27,31 +23,31 @@
 </div>
 
 <!-- Bottom fixed buttons -->
-<div class="dialog-bottom-icons">
+<div class="simple-bottombar">
   <ng-container *ngIf="forSale && priceData">
     <button
       *ngIf="priceData.priceSmall"
-      mat-raised-button
+      type="button"
+      class="price-btn"
       (click)="chooseSizeAndAdd('small')"
-      class="check-button"
     >
       Small ({{ priceData.priceSmall | currency: "USD" : "symbol" : "1.0-0" }})
     </button>
 
     <button
       *ngIf="priceData.priceFull"
-      mat-raised-button
+      type="button"
+      class="price-btn"
       (click)="chooseSizeAndAdd('full')"
-      class="check-button"
     >
       Full ({{ priceData.priceFull | currency: "USD" : "symbol" : "1.0-0" }})
     </button>
 
     <button
       *ngIf="priceData.priceRoyalty"
-      mat-raised-button
+      type="button"
+      class="price-btn"
       (click)="chooseSizeAndAdd('royalty')"
-      class="check-button"
     >
       Royalty ({{
         priceData.priceRoyalty | currency: "USD" : "symbol" : "1.0-0"
