@@ -7,21 +7,27 @@
 
 <!-- ✅ Swipe strip -->
 <div class="modal-content">
-  <div class="swipe-strip" #strip>
-    <div class="slide" *ngFor="let img of images">
+  <div class="swipe-strip" #strip (scroll)="onStripScroll()">
+    <div class="slide" *ngFor="let img of images; let i = index">
       <mat-card class="modal-card">
         <img [src]="img.previewImageUrl" class="full-image" alt="Image" />
       </mat-card>
     </div>
   </div>
+
+  <!-- ✅ Dots indicator -->
+  <div class="dots" *ngIf="images.length > 1">
+    <span
+      class="dot"
+      *ngFor="let _ of images; let i = index"
+      [class.active]="i === currentIndex"
+      (click)="goTo(i)"
+    ></span>
+  </div>
 </div>
 
-<!-- Bottom fixed icons -->
+<!-- Bottom fixed buttons -->
 <div class="dialog-bottom-icons">
-  <button mat-icon-button>
-    <mat-icon class="modal-bottom-icon">chat_bubble_outline</mat-icon>
-  </button>
-
   <ng-container *ngIf="forSale && priceData">
     <button
       *ngIf="priceData.priceSmall"
@@ -52,8 +58,4 @@
       }})
     </button>
   </ng-container>
-
-  <button mat-icon-button>
-    <mat-icon class="modal-bottom-icon">favorite_border</mat-icon>
-  </button>
 </div>

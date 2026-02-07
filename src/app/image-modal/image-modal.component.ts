@@ -8,11 +8,10 @@ import {
 import { MatCardModule } from '@angular/material/card';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { select, Store } from '@ngrx/store';
+import { Store } from '@ngrx/store';
 import { addImageToCart } from '../store/actions/shopcart.actions';
 import { ShopCart } from './../models/shopCart';
 import { MatButtonModule } from '@angular/material/button';
-import { take } from 'rxjs';
 import { CommonModule } from '@angular/common';
 
 import { Price, Image } from '../models/response';
@@ -27,12 +26,13 @@ import { Price, Image } from '../models/response';
 export class ImageModalComponent implements AfterViewInit {
   selectedSize: 'small' | 'full' | 'royalty' | null = null;
 
-  // ✅ now modal gets everything from caller (event page OR viewpics page)
   images: Image[] = [];
   startIndex = 0;
 
   priceData: Price | null = null;
   forSale = false;
+
+  currentIndex = 0;
 
   @ViewChild('strip', { static: false }) stripRef?: ElementRef<HTMLDivElement>;
 
@@ -40,7 +40,7 @@ export class ImageModalComponent implements AfterViewInit {
     public dialogRef: MatDialogRef<ImageModalComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data: {
-      image?: Image; // keep backward compatibility
+      image?: Image; // backward compatibility
       images?: Image[];
       startIndex?: number;
       forSale?: boolean;
@@ -55,6 +55,7 @@ export class ImageModalComponent implements AfterViewInit {
         : data.image
           ? [data.image]
           : [];
+
     this.startIndex = Math.max(
       0,
       Math.min(data.startIndex ?? 0, this.images.length - 1),
@@ -62,17 +63,30 @@ export class ImageModalComponent implements AfterViewInit {
 
     this.forSale = !!data.forSale;
     this.priceData = data.prices ?? null;
+
+    this.currentIndex = this.startIndex;
   }
 
   ngAfterViewInit(): void {
-    // scroll to the tapped image
+    // ✅ jump to tapped image
     setTimeout(() => {
-      this.scrollToIndex(this.startIndex);
+      this.scrollToIndex(this.startIndex, 'auto');
+      this.currentIndex = this.startIndex;
     }, 0);
   }
 
   closeModal(): void {
     this.dialogRef.close();
+  }
+
+  onStripScroll(): void {
+    this.currentIndex = this.getCenteredIndex();
+  }
+
+  goTo(index: number): void {
+    const next = this.clampIndex(index);
+    this.currentIndex = next;
+    this.scrollToIndex(next, 'smooth');
   }
 
   chooseSizeAndAdd(size: 'small' | 'full' | 'royalty'): void {
@@ -89,27 +103,43 @@ export class ImageModalComponent implements AfterViewInit {
     this.store.dispatch(
       addImageToCart({ cartItem: { image: current, size, price } }),
     );
+
     this.dialogRef.close({ addedToCart: true, image: current });
   }
 
   private getCurrentImage(): Image | null {
-    const idx = this.getCenteredIndex();
-    return this.images[idx] ?? null;
+    return this.images[this.currentIndex] ?? null;
   }
 
-  // ✅ detect which image is currently centered (based on scrollLeft)
+  private getStripWidth(): number {
+    const el = this.stripRef?.nativeElement;
+    if (!el) return 1;
+    return el.getBoundingClientRect().width || el.clientWidth || 1;
+  }
+
   private getCenteredIndex(): number {
     const el = this.stripRef?.nativeElement;
-    if (!el) return this.startIndex;
-    const w = el.clientWidth;
-    if (!w) return this.startIndex;
-    return Math.round(el.scrollLeft / w);
+    if (!el) return this.currentIndex;
+
+    const w = this.getStripWidth();
+    const idx = Math.round(el.scrollLeft / w);
+    return this.clampIndex(idx);
   }
 
-  private scrollToIndex(index: number): void {
+  private scrollToIndex(
+    index: number,
+    behavior: ScrollBehavior = 'auto',
+  ): void {
     const el = this.stripRef?.nativeElement;
     if (!el) return;
-    const w = el.clientWidth;
-    el.scrollTo({ left: w * index, behavior: 'instant' as any });
+
+    const w = this.getStripWidth();
+    const idx = this.clampIndex(index);
+
+    el.scrollTo({ left: w * idx, behavior });
+  }
+
+  private clampIndex(i: number): number {
+    return Math.max(0, Math.min(i, this.images.length - 1));
   }
 }

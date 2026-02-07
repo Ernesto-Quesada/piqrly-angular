@@ -2,37 +2,64 @@ mat-card {
   padding: 0;
 }
 
-.modal-content {
-  height: 100vh;
+:host {
+  display: block;
   width: 100vw;
-  overflow: hidden;
+  height: 100vh;
   background: #000;
 }
 
-/* ✅ horizontal swipe strip */
-.swipe-strip {
-  height: 100vh;
+.modal-content {
+  position: relative;
   width: 100vw;
+  height: 100vh;
+  background: #000;
+  overflow: hidden;
+}
+
+/* ✅ the actual horizontal scroller */
+.swipe-strip {
+  width: 100vw;
+  height: 100vh;
   display: flex;
-  overflow-x: auto;
+  flex-wrap: nowrap;
+
+  overflow-x: scroll;
   overflow-y: hidden;
+
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
+
+  /* ✅ FORCE horizontal swipe */
+  touch-action: pan-x;
+
+  scrollbar-width: none;
+}
+
+.swipe-strip::-webkit-scrollbar {
+  display: none;
 }
 
 .slide {
   flex: 0 0 100vw;
+  width: 100vw;
   height: 100vh;
-  scroll-snap-align: center;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .modal-card {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   background: #000;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
 }
 
 .full-image {
@@ -40,6 +67,10 @@ mat-card {
   height: 100%;
   object-fit: contain;
   display: block;
+
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
 }
 
 /* Top icons */
@@ -64,7 +95,7 @@ mat-card {
   font-size: 24px;
 }
 
-/* Bottom icons */
+/* Bottom buttons */
 .dialog-bottom-icons {
   position: fixed;
   bottom: 16px;
@@ -77,11 +108,33 @@ mat-card {
   z-index: 1001;
 }
 
-.modal-bottom-icon {
-  color: #fff;
-}
-
 .check-button {
   background: rgba(255, 255, 255, 0.95);
   z-index: 10;
+}
+
+/* Dots */
+.dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  opacity: 0.4;
+  background: white;
+  cursor: pointer;
+}
+
+.dot.active {
+  opacity: 1;
+  transform: scale(1.15);
 }
