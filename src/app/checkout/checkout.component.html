@@ -177,7 +177,7 @@
 
             <div class="flex-grow-1">
               <div class="line1">{{ item.size }} size</div>
-              <div class="line2">{{ item.price | currency }}</div>
+              <div class="line2">{{ getItemPrice(item) | currency }}</div>
             </div>
           </div>
         </div>

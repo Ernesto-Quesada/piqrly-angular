@@ -1,0 +1,302 @@
+<!-- viewgallery.component.html -->
+<div class="gallery-page container-fluid px-0">
+  <!-- TOP HEADER -->
+  <div class="top-card">
+    <div class="top-row">
+      <div class="top-left">
+        <div class="top-title">Photos for Sale</div>
+
+        <ng-container *ngIf="owner() as o">
+          <div class="top-sub">
+            <span class="label">Gallery Creator</span>
+            <span class="value">
+              {{ (o.firstName || "").trim() }} {{ (o.lastName || "").trim() }}
+            </span>
+          </div>
+
+          <div class="top-sub contact">
+            <span *ngIf="o.email" class="contact-item">
+              <mat-icon class="mini">mail</mat-icon>
+              {{ o.email }}
+            </span>
+          </div>
+        </ng-container>
+
+        <!-- <div class="top-sub" *ngIf="galleryId()">
+          <span class="label">ID</span>
+          <span class="value">{{ galleryId() }}</span>
+        </div> -->
+
+        <div class="top-sub" *ngIf="purchased()">
+          <span class="pill success">Purchased</span>
+        </div>
+
+        <div class="top-hint" *ngIf="!purchased() && locked() && !isLoading()">
+          This gallery is locked. Enter the PIN to view.
+        </div>
+      </div>
+
+      <div class="top-right" *ngIf="owner() as o">
+        <div class="mini-avatar" *ngIf="!o.profilePic">
+          <mat-icon>person</mat-icon>
+        </div>
+        <img
+          *ngIf="o.profilePic"
+          class="mini-avatar-img"
+          [src]="o.profilePic"
+          alt="Creator avatar"
+        />
+      </div>
+
+      <div class="top-right" *ngIf="!owner()">
+        <div class="mini-avatar">
+          <mat-icon>lock</mat-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="state-card" *ngIf="isLoading()">
+    <div class="state-row">
+      <div class="spinner"></div>
+      <div class="state-text">Loading…</div>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="state-card error" *ngIf="pageErrorMsg() && !locked()">
+    <div class="state-title">Something went wrong</div>
+    <div class="state-text">{{ pageErrorMsg() }}</div>
+  </div>
+
+  <!-- =========================
+       UNLOCKED CONTENT
+       ========================= -->
+  <ng-container *ngIf="!isLoading() && unlocked() && !purchased()">
+    <!-- HERO / ACTION PANEL -->
+    <div class="hero">
+      <div class="row mb-1">
+        <div class="col">
+          <div class="hero-hint">
+            <ng-container *ngIf="selectMode; else notSelectMode">
+              Tap a photo to pick a size. Tap again to remove.
+            </ng-container>
+            <ng-template #notSelectMode>
+              <span class="hint-muted"> Tap a photo to view full size. </span>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-2">
+        <div class="col-12 col-md-auto">
+          <button
+            type="button"
+            mat-stroked-button
+            class="btn-pill btn-secondary w-100"
+            [class.selecting-active]="selectMode && selectedCount === 0"
+            [class.has-selection]="selectedCount > 0"
+            (click)="onSelectOrClear()"
+          >
+            <mat-icon>
+              {{
+                selectedCount > 0
+                  ? "delete_outline"
+                  : selectMode
+                    ? "touch_app"
+                    : "check_circle"
+              }}
+            </mat-icon>
+            {{
+              selectedCount > 0
+                ? "Clear · " + selectedCount + " selected"
+                : selectMode
+                  ? "Tap photos to select"
+                  : "Select pictures"
+            }}
+          </button>
+        </div>
+      </div>
+      <div class="hero-hint" *ngIf="selectMode">
+        <span class="hint-muted d-block lineh15"
+          >S:small size.Great for screen and social media.</span
+        >
+        <span class="hint-muted d-block lineh15"
+          >F:full sized. Best for printing.</span
+        >
+        <span class="hint-muted d-block lineh15"
+          >R:Royalty free. Best for business use</span
+        >
+      </div>
+    </div>
+
+    <div class="subtitle p-2" *ngIf="pictures().length > 0">
+      <ng-container *ngIf="!selectMode"> Tap to view full size </ng-container>
+      <ng-container *ngIf="selectMode">
+        Tap photo → pick size below it → tap again to remove
+      </ng-container>
+    </div>
+
+    <div *ngIf="pictures().length === 0" class="empty">
+      No photos found in this gallery.
+    </div>
+
+    <!-- GRID -->
+    <div class="grid" *ngIf="pictures().length > 0">
+      <div
+        class="tile-wrap"
+        *ngFor="let img of pictures(); let i = index; trackBy: trackByPic"
+      >
+        <!-- IMAGE CARD -->
+        <div
+          class="img-card mat-elevation-z2"
+          role="button"
+          tabindex="0"
+          (click)="onTileTap(img, i)"
+          (keydown.enter)="onTileTap(img, i)"
+          (keydown.space)="$event.preventDefault(); onTileTap(img, i)"
+          [class.is-selected]="isInCart(img.pictureId)"
+          [class.is-expanded]="expandedPriceId() === img.pictureId"
+          aria-label="Open photo or select size"
+        >
+          <img [src]="img.previewImageUrl || img.imageUrl" alt="photo" />
+
+          <!-- ✅ Selected badge top-right (only when in cart) -->
+          <div class="selected-pill" *ngIf="isInCart(img.pictureId)">
+            {{ cartSizeLabel(img.pictureId) }}
+          </div>
+
+          <!-- ✅ Selection overlay (check icon bottom-right) -->
+          <div class="img-overlay" *ngIf="selectMode$ | async">
+            <mat-icon class="check size" *ngIf="isInCart(img.pictureId)">
+              check_circle
+            </mat-icon>
+            <mat-icon class="check muted" *ngIf="!isInCart(img.pictureId)">
+              radio_button_unchecked
+            </mat-icon>
+          </div>
+        </div>
+
+        <!-- ✅ PRICE DRAWER — slides in/out below the tile in select mode -->
+        <div
+          class="price-drawer"
+          [class.open]="selectMode && expandedPriceId() === img.pictureId"
+          *ngIf="selectMode && $any(img).sellable && $any(img).price"
+        >
+          <div class="price-drawer-inner">
+            <!-- Small -->
+            <button
+              type="button"
+              class="drawer-row"
+              [class.active]="selectedSizeFor(img.pictureId) === 'small'"
+              (click)="onChipPick($event, img, 'small')"
+            >
+              <span class="drawer-label">S:</span>
+              <span class="drawer-price">
+                {{ $any(img).price.priceSmall | currency }}
+              </span>
+            </button>
+
+            <!-- Full -->
+            <button
+              type="button"
+              class="drawer-row"
+              [class.active]="selectedSizeFor(img.pictureId) === 'full'"
+              (click)="onChipPick($event, img, 'full')"
+            >
+              <span class="drawer-label">F:</span>
+              <span class="drawer-price">
+                {{ $any(img).price.priceFull | currency }}
+              </span>
+            </button>
+
+            <!-- Royalty -->
+            <button
+              type="button"
+              class="drawer-row"
+              [class.active]="selectedSizeFor(img.pictureId) === 'royalty'"
+              (click)="onChipPick($event, img, 'royalty')"
+            >
+              <span class="drawer-label">R:</span>
+              <span class="drawer-price justify-content-center d-flex">
+                {{ $any(img).price.priceRoyalty | currency }}
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STICKY CHECKOUT BAR -->
+    <div class="sticky">
+      <div class="sticky-info">
+        <div class="sticky-title">
+          {{ selectMode ? selectedCount + " selected" : "For sale" }}
+        </div>
+        <div class="sticky-sub">
+          {{
+            selectMode ? "Pick a size per photo" : "High-res purchase available"
+          }}
+        </div>
+      </div>
+
+      <button
+        type="button"
+        mat-raised-button
+        class="btn-primary small"
+        (click)="goToCheckout()"
+        [disabled]="selectedCount === 0"
+      >
+        Checkout {{ selectMode ? "(" + selectedCount + ")" : "" }}
+      </button>
+    </div>
+  </ng-container>
+
+  <!-- =========================
+       PIN MODAL OVERLAY
+       ========================= -->
+  <div class="pin-backdrop" *ngIf="!isLoading() && locked() && !purchased()">
+    <div class="pin-modal" role="dialog" aria-modal="true">
+      <div class="pin-modal-head">
+        <div class="pin-title">Enter PIN to open</div>
+        <div class="pin-badge">
+          <mat-icon class="mini">lock</mat-icon>
+        </div>
+      </div>
+
+      <div class="pin-error" *ngIf="pinErrorMsg()">
+        {{ pinErrorMsg() }}
+      </div>
+
+      <input
+        class="pin-input"
+        type="password"
+        inputmode="numeric"
+        maxlength="6"
+        [ngModel]="pin()"
+        (ngModelChange)="pin.set($event)"
+        placeholder="4–6 digits"
+        [disabled]="isUnlocking()"
+      />
+
+      <button
+        mat-raised-button
+        class="btn-primary wide"
+        type="button"
+        (click)="submitPin()"
+        [disabled]="isUnlocking()"
+      >
+        <span class="btn-row" *ngIf="isUnlocking(); else unlockText">
+          <span class="btn-spinner"></span>
+          <span>Unlocking…</span>
+        </span>
+        <ng-template #unlockText>Unlock</ng-template>
+      </button>
+
+      <div class="pin-hint">
+        Tip: The PIN is shown in the mobile app in the "View gallery" sheet.
+      </div>
+    </div>
+  </div>
+</div>

@@ -215,8 +215,14 @@ export class ViewpicComponent implements OnInit, OnDestroy {
 
         const pub =
           typeof res?.isPublic === 'boolean' ? res.isPublic : undefined;
+        const isInvited =
+          typeof res?.isInvited === 'boolean' ? res.isInvited : false;
 
-        return pub !== true;
+        // ✅ private AND not invited = show login wall
+        // private AND invited (logged in) = show pictures
+        if (pub === true) return false; // public event, never private
+        if (isInvited === true) return false; // user is on the list, let them in
+        return true; // private and not invited
       }),
       distinctUntilChanged(),
     );

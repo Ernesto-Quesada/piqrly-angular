@@ -22,6 +22,12 @@ export const API = {
     // paidEventZip: (sessionId: string) =>
     //   `${environment.apiBaseUrl}/api/pictures/paid-pictures/${sessionId}/download-zip`,
   },
+  galleries: {
+    meta: (galleryId: string) =>
+      `${environment.apiBaseUrl}/api/galleries/${galleryId}`,
+    unlock: (galleryId: string) =>
+      `${environment.apiBaseUrl}/api/galleries/${galleryId}/unlock`,
+  },
 
   checkout: {
     createSession: `${environment.apiBaseUrl}/create-checkout-session`,

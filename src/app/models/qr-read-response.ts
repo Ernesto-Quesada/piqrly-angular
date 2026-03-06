@@ -8,6 +8,7 @@ export interface QrViewResponse {
 
   // ✅ Event invite flow extras (optional so QR flow doesn’t break)
   eventName?: string | null;
+  name?: string | null; // fallback if eventName is missing, for backward compatibility
   isPublic?: boolean | null;
 
   // (optional: present in your JSON, safe to include)

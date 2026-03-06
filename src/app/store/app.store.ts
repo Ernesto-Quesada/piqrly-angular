@@ -9,6 +9,7 @@ import { landingDataReducer } from './reducers/landingData.reducer';
 import { LandingDataEffects } from './effects/landingData.effects';
 import { EventDataEffects } from './effects/events.effects';
 import { eventLandingDataReducer } from './reducers/event.reducer';
+import { GalleryEffects } from './effects/gallery.effects';
 export const appStoreProviders = [
   provideStore(
     {
@@ -18,7 +19,12 @@ export const appStoreProviders = [
     },
     { metaReducers: [localStorageMetaReducer] },
   ),
-  provideEffects([ShopCartEffects, LandingDataEffects, EventDataEffects]),
+  provideEffects([
+    ShopCartEffects,
+    LandingDataEffects,
+    EventDataEffects,
+    GalleryEffects,
+  ]),
 
   provideStoreDevtools({
     maxAge: 25, // Retains last 25 states

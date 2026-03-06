@@ -32,11 +32,25 @@ export const routes: Routes = [
       import('./viewpic/viewpic.component').then((m) => m.ViewpicComponent),
   },
 
+  // ✅ NEW: selection gallery (PIN gate lives here)
+  {
+    path: 'viewgallery/:galleryId',
+    loadComponent: () =>
+      import('./viewgallery/viewgallery.component').then(
+        (m) => m.ViewGalleryComponent,
+      ),
+  },
+
   // =========================
   // CHECKOUT
   // =========================
   { path: 'checkout', component: CheckoutComponent },
   { path: 'checkout-success', component: CheckoutSuccessComponent },
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./login/login.component').then((m) => m.LoginComponent),
+  },
 
   // Optional fallback
   { path: '**', redirectTo: '' },

@@ -26,7 +26,7 @@ export const landingDataReducer = createReducer<QrViewResponse>(
     owner: response.owner ?? null,
 
     // ✅ STORE EVENT HEADER FIELDS (this is what you’re missing)
-    eventName: response.eventName ?? null,
+    eventName: response.eventName ?? response.name ?? null,
     isPublic: typeof response.isPublic === 'boolean' ? response.isPublic : null,
 
     // optional passthroughs
@@ -39,6 +39,6 @@ export const landingDataReducer = createReducer<QrViewResponse>(
   on(loadPicturePriceFailure, (state) => ({
     ...state,
     // optional: clear pictures on error
-    // pictures: [],
+    ...initialDataState,
   })),
 );

@@ -114,6 +114,23 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     this.isPaying = false;
   }
 
+  // ✅ FIX 1: Your HTML calls getItemPrice(item) in the cartId path.
+  // This method MUST exist or Angular will fail compilation.
+  // Works for webCartItems (Flutter -> Web cart) and any future cart item shapes.
+  getItemPrice(item: any): number {
+    if (!item) return 0;
+
+    // expected for web cart: item.price
+    const direct = Number(item.price);
+    if (!Number.isNaN(direct)) return direct;
+
+    // fallback: nested structures (just in case)
+    const nested = Number(item?.image?.price);
+    if (!Number.isNaN(nested)) return nested;
+
+    return 0;
+  }
+
   ngOnInit(): void {
     const cameFromStripe =
       sessionStorage.getItem('stripeRedirected') === '1' ||
@@ -162,30 +179,34 @@ export class CheckoutComponent implements OnInit, OnDestroy {
               this.itemTotals = {
                 fullSizeItems: fullItems.length,
                 fullSizeSubT: fullItems.reduce(
-                  (sum: number, i: any) => sum + i.price,
+                  (sum: number, i: any) => sum + (Number(i.price) || 0),
                   0,
                 ),
-                fullSizePriceEach: fullItems.length ? fullItems[0].price : 0,
+                fullSizePriceEach: fullItems.length
+                  ? Number(fullItems[0].price) || 0
+                  : 0,
 
                 smallItems: smallItems.length,
                 smallSizeSubT: smallItems.reduce(
-                  (sum: number, i: any) => sum + i.price,
+                  (sum: number, i: any) => sum + (Number(i.price) || 0),
                   0,
                 ),
-                smallSizePriceEach: smallItems.length ? smallItems[0].price : 0,
+                smallSizePriceEach: smallItems.length
+                  ? Number(smallItems[0].price) || 0
+                  : 0,
 
                 royaltyItems: royaltyItems.length,
                 royaltySubT: royaltyItems.reduce(
-                  (sum: number, i: any) => sum + i.price,
+                  (sum: number, i: any) => sum + (Number(i.price) || 0),
                   0,
                 ),
                 royaltyPriceEach: royaltyItems.length
-                  ? royaltyItems[0].price
+                  ? Number(royaltyItems[0].price) || 0
                   : 0,
 
                 itemTotal: this.webCartItems.length,
                 grandTotal: this.webCartItems.reduce(
-                  (sum: number, i: any) => sum + i.price,
+                  (sum: number, i: any) => sum + (Number(i.price) || 0),
                   0,
                 ),
               };
@@ -226,28 +247,34 @@ export class CheckoutComponent implements OnInit, OnDestroy {
           this.itemTotals = {
             fullSizeItems: fullItems.length,
             fullSizeSubT: fullItems.reduce(
-              (sum: number, i: any) => sum + i.price,
+              (sum: number, i: any) => sum + (Number(i.price) || 0),
               0,
             ),
-            fullSizePriceEach: fullItems.length ? fullItems[0].price : 0,
+            fullSizePriceEach: fullItems.length
+              ? Number(fullItems[0].price) || 0
+              : 0,
 
             smallItems: smallItems.length,
             smallSizeSubT: smallItems.reduce(
-              (sum: number, i: any) => sum + i.price,
+              (sum: number, i: any) => sum + (Number(i.price) || 0),
               0,
             ),
-            smallSizePriceEach: smallItems.length ? smallItems[0].price : 0,
+            smallSizePriceEach: smallItems.length
+              ? Number(smallItems[0].price) || 0
+              : 0,
 
             royaltyItems: royaltyItems.length,
             royaltySubT: royaltyItems.reduce(
-              (sum: number, i: any) => sum + i.price,
+              (sum: number, i: any) => sum + (Number(i.price) || 0),
               0,
             ),
-            royaltyPriceEach: royaltyItems.length ? royaltyItems[0].price : 0,
+            royaltyPriceEach: royaltyItems.length
+              ? Number(royaltyItems[0].price) || 0
+              : 0,
 
             itemTotal: cartState.items.length,
             grandTotal: cartState.items.reduce(
-              (sum: number, i: any) => sum + i.price,
+              (sum: number, i: any) => sum + (Number(i.price) || 0),
               0,
             ),
           };
@@ -304,17 +331,29 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     // ✅ 2) QR FLOW
     this.checkoutState$.pipe(take(1)).subscribe({
       next: (state) => {
+        console.log('🔍 STATE ITEMS IN PAY():', JSON.stringify(state.items));
+        console.log('🔍 STATE SUBTOTAL:', state.subtotalPrice);
         if (!state?.items || state.items.length === 0) {
           this.isPaying = false;
           this.goBackToLanding();
           return;
         }
 
+        // ✅ FIX 2: do NOT trust state.subtotalPrice (Gallery was ending up with 0)
+        // Always compute from the items you will charge for.
+        const computedTotal = state.items.reduce((sum: number, item: any) => {
+          return sum + this.getItemPrice(item);
+        }, 0);
+
+        const totalCents = Math.round(computedTotal * 100);
+
         const payload = {
-          totalAmount: state.subtotalPrice * 100,
+          totalAmount: totalCents, // cents
           user: state.user,
           pictureIds: state.items.map((item) => item.image.pictureId),
         };
+
+        console.log('💳 CHECKOUT PAYLOAD DEBUG:', payload);
 
         this.checkoutService.createCheckoutSession(payload).subscribe({
           next: async (data) => {
@@ -357,6 +396,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     // 4) final fallback
     this.router.navigate(['/']);
   }
+
   // Prefer preview/thumb url; fallback safely
   getCheckoutThumb(item: any): string {
     // cart flow item might have:
@@ -381,6 +421,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     // optional fallback asset (create one)
     img.src = '/assets/img/placeholder-thumb.png';
   }
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
