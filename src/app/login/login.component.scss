@@ -227,3 +227,16 @@
     cursor: not-allowed;
   }
 }
+.legal-note {
+  margin-top: 14px;
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: center;
+  color: #6b7280;
+}
+
+.legal-note a {
+  color: inherit;
+  text-decoration: underline;
+  font-weight: 500;
+}

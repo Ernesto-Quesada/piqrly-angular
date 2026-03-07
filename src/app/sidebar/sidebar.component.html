@@ -1,4 +1,12 @@
-<div class="h-100 app-shell">
+<!-- sidebar.component.html -->
+
+<!-- ✅ SHELL-FREE: login and other fullscreen routes render with no sidebar/header -->
+<ng-container *ngIf="isShellFree">
+  <router-outlet></router-outlet>
+</ng-container>
+
+<!-- ✅ NORMAL SHELL: all other routes get sidebar + header -->
+<div class="h-100 app-shell" *ngIf="!isShellFree">
   <mat-sidenav-container class="shell-container w-100 h-100">
     <!-- SIDEBAR -->
     <mat-sidenav
@@ -14,12 +22,10 @@
             <div class="brand brand-compact">
               <div class="brand-mark">P</div>
               <div class="brand-text">
-                <!-- <div class="brand-title">Piqrly</div> -->
                 <div class="brand-subtitle">Photos & QR sharing</div>
               </div>
             </div>
           </div>
-
           <div class="col-auto">
             <button
               mat-icon-button
@@ -35,6 +41,7 @@
 
       <!-- NAV -->
       <mat-nav-list class="nav">
+        <!-- ✅ EVERYONE -->
         <a mat-list-item class="nav-item" [routerLink]="['/public']">
           <mat-icon>home</mat-icon>
           <span>Home</span>
@@ -44,10 +51,81 @@
           <mat-icon>download</mat-icon>
           <span>Download App</span>
         </a>
+
+        <!-- ✅ LOGGED IN REGULAR USERS (not admin) -->
+        <ng-container *ngIf="isLoggedIn && !isAdmin">
+          <mat-divider class="nav-divider"></mat-divider>
+          <div class="nav-section-label">My Account</div>
+
+          <a mat-list-item class="nav-item" [routerLink]="['/coming-soon']">
+            <mat-icon>person_outline</mat-icon>
+            <span>My Profile</span>
+          </a>
+
+          <a mat-list-item class="nav-item" [routerLink]="['/coming-soon']">
+            <mat-icon>receipt_long</mat-icon>
+            <span>My Purchases</span>
+          </a>
+
+          <a mat-list-item class="nav-item" [routerLink]="['/coming-soon']">
+            <mat-icon>photo_library</mat-icon>
+            <span>My Gallery</span>
+          </a>
+        </ng-container>
+
+        <!-- ✅ ADMIN ONLY -->
+        <ng-container *ngIf="isAdmin">
+          <mat-divider class="nav-divider"></mat-divider>
+          <div class="nav-section-label admin-label">
+            <mat-icon class="admin-badge-icon">shield</mat-icon>
+            Admin
+          </div>
+
+          <a
+            mat-list-item
+            class="nav-item admin-item"
+            [routerLink]="['/admin/feedback']"
+          >
+            <mat-icon>feedback</mat-icon>
+            <span>Feedback & Reports</span>
+          </a>
+
+          <a
+            mat-list-item
+            class="nav-item admin-item"
+            [routerLink]="['/coming-soon']"
+          >
+            <mat-icon>group</mat-icon>
+            <span>Users</span>
+          </a>
+
+          <a
+            mat-list-item
+            class="nav-item admin-item"
+            [routerLink]="['/coming-soon']"
+          >
+            <mat-icon>attach_money</mat-icon>
+            <span>Sales & Revenue</span>
+          </a>
+
+          <a
+            mat-list-item
+            class="nav-item admin-item"
+            [routerLink]="['/admin/content-reports']"
+          >
+            <mat-icon>flag</mat-icon>
+            <span>Content Reports</span>
+          </a>
+        </ng-container>
       </mat-nav-list>
 
+      <!-- FOOTER -->
       <div class="sidenav-footer">
-        <a class="footer-link">
+        <a class="footer-link" routerLink="/contact">
+          <mat-icon>mail_outline</mat-icon>
+          <span>Contact Us</span>
+        </a>
+        <a class="footer-link" routerLink="/terms">
           <mat-icon>gavel</mat-icon>
           <span>Terms & Conditions</span>
         </a>
@@ -74,13 +152,12 @@
           <!-- BRAND -->
           <div class="col text-center text-md-start">
             <div class="brand-inline">
-              <!-- <div class="brand-mark">P</div> -->
               <div class="brand-title">Piqrly</div>
             </div>
           </div>
 
-          <!-- CART -->
-          <div class="col-auto">
+          <!-- RIGHT SIDE: cart + auth -->
+          <div class="col-auto d-flex align-items-center gap-1">
             <button
               *ngIf="cartBadgeCount > 0"
               mat-icon-button
@@ -100,6 +177,30 @@
               *ngIf="cartBadgeCount <= 0"
               style="width: 44px; height: 44px"
             ></div>
+
+            <!-- LOGOUT -->
+            <button
+              *ngIf="isLoggedIn"
+              mat-icon-button
+              class="icon-bubble"
+              (click)="logout()"
+              aria-label="Logout"
+              title="Logout"
+            >
+              <mat-icon>logout</mat-icon>
+            </button>
+
+            <!-- LOGIN -->
+            <button
+              *ngIf="!isLoggedIn"
+              mat-icon-button
+              class="icon-bubble"
+              (click)="goToLogin()"
+              aria-label="Login"
+              title="Login"
+            >
+              <mat-icon>login</mat-icon>
+            </button>
           </div>
         </div>
       </header>
@@ -110,4 +211,7 @@
       </div>
     </mat-sidenav-content>
   </mat-sidenav-container>
+
+  <!-- ✅ Feedback tab (visible on all pages) -->
+  <app-feedback-form></app-feedback-form>
 </div>

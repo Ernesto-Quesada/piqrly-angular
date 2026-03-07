@@ -70,10 +70,11 @@
   left: 0;
   width: 100%;
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between; /* ✅ close left, flag right */
   padding: 0 12px;
   z-index: 2000;
-  pointer-events: none; /* let swipe pass through */
+  pointer-events: none;
+  box-sizing: border-box;
 }
 
 .icon-btn {
@@ -84,6 +85,24 @@
   font-size: 22px;
   padding: 10px 14px;
   border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* ✅ red tint for report button */
+.report-btn {
+  background: rgba(239, 68, 68, 0.75);
+  padding: 2px 2px;
+    height: 16px;
+    width: 16px;
+
+  mat-icon {
+    font-size: 12px;
+    width: 12px;
+    height: 12px;
+  }
 }
 
 /* Bottom bar */
@@ -97,7 +116,7 @@
   gap: 8px;
   padding: 0 12px;
   z-index: 2000;
-  pointer-events: none; /* let swipe pass through */
+  pointer-events: none;
 }
 
 .price-btn {
@@ -114,7 +133,7 @@
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 64px; /* above buttons */
+  bottom: 64px;
   display: flex;
   justify-content: center;
   gap: 8px;

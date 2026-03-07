@@ -4,18 +4,27 @@ import {
   AfterViewInit,
   ViewChild,
   ElementRef,
+  inject,
 } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MatBottomSheet,
+  MatBottomSheetModule,
+} from '@angular/material/bottom-sheet';
 import { Store } from '@ngrx/store';
 import { addImageToCart } from '../store/actions/shopcart.actions';
 import { ShopCart } from './../models/shopCart';
 import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 import { Price, Image } from '../models/response';
+import { AuthService } from '../services/auth.service';
+import { ReportContentComponent } from '../report-content/report-content.component';
 
 @Component({
   selector: 'image-modal',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatIconModule, MatButtonModule, MatBottomSheetModule],
   templateUrl: './image-modal.component.html',
   styleUrl: './image-modal.component.scss',
 })
@@ -32,11 +41,18 @@ export class ImageModalComponent implements AfterViewInit {
 
   @ViewChild('strip', { static: false }) stripRef?: ElementRef<HTMLDivElement>;
 
+  private bottomSheet = inject(MatBottomSheet);
+  private authService = inject(AuthService);
+
+  get isLoggedIn(): boolean {
+    return this.authService.isLoggedIn();
+  }
+
   constructor(
     public dialogRef: MatDialogRef<ImageModalComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data: {
-      image?: Image; // backward compatibility
+      image?: Image;
       images?: Image[];
       startIndex?: number;
       forSale?: boolean;
@@ -58,12 +74,10 @@ export class ImageModalComponent implements AfterViewInit {
 
     this.forSale = !!data.forSale;
     this.priceData = data.prices ?? null;
-
     this.currentIndex = this.startIndex;
   }
 
   ngAfterViewInit(): void {
-    // jump to tapped image
     setTimeout(() => {
       this.scrollToIndex(this.startIndex, 'auto');
       this.currentIndex = this.startIndex;
@@ -102,6 +116,17 @@ export class ImageModalComponent implements AfterViewInit {
     this.dialogRef.close({ addedToCart: true, image: current });
   }
 
+  // ✅ open report bottom sheet for current image
+  openReport(): void {
+    const current = this.getCurrentImage();
+    if (!current) return;
+
+    this.bottomSheet.open(ReportContentComponent, {
+      data: { pictureId: current.pictureId },
+      panelClass: 'report-bottom-sheet',
+    });
+  }
+
   private getCurrentImage(): Image | null {
     return this.images[this.currentIndex] ?? null;
   }
@@ -130,7 +155,6 @@ export class ImageModalComponent implements AfterViewInit {
 
     const w = this.getStripWidth();
     const idx = this.clampIndex(index);
-
     el.scrollTo({ left: w * idx, behavior });
   }
 

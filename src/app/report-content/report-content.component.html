@@ -1,0 +1,69 @@
+<!-- report-content.component.html -->
+<div class="report-sheet">
+  <!-- HEADER -->
+  <div class="sheet-header">
+    <div class="sheet-title">
+      <mat-icon class="title-icon">flag</mat-icon>
+      <span>Report Photo</span>
+    </div>
+    <button type="button" class="close-btn" (click)="dismiss()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="success-state" *ngIf="submitted()">
+    <mat-icon class="success-icon">check_circle</mat-icon>
+    <div class="success-title">Report Submitted</div>
+    <div class="success-sub">Thank you. Our team will review this photo.</div>
+  </div>
+
+  <!-- FORM -->
+  <ng-container *ngIf="!submitted()">
+    <div class="sheet-sub">Why are you reporting this photo?</div>
+
+    <!-- REASONS -->
+    <div class="reasons">
+      <button
+        *ngFor="let r of reasons"
+        type="button"
+        class="reason-btn"
+        [class.active]="selectedReason === r.value"
+        (click)="selectReason(r.value)"
+      >
+        <mat-icon>{{ r.icon }}</mat-icon>
+        <span>{{ r.label }}</span>
+      </button>
+    </div>
+
+    <!-- DETAILS -->
+    <div class="details-field">
+      <div class="details-label">
+        Additional details <span class="optional">(optional)</span>
+      </div>
+      <textarea
+        class="details-input"
+        [(ngModel)]="details"
+        placeholder="Tell us more..."
+        rows="3"
+        maxlength="500"
+        [disabled]="isLoading()"
+      ></textarea>
+    </div>
+
+    <!-- ERROR -->
+    <div class="error-msg" *ngIf="errorMsg()">{{ errorMsg() }}</div>
+
+    <!-- SUBMIT -->
+    <button
+      type="button"
+      class="submit-btn"
+      (click)="submit()"
+      [disabled]="isLoading() || !selectedReason"
+    >
+      <mat-spinner *ngIf="isLoading()" diameter="18"></mat-spinner>
+      <span *ngIf="!isLoading()">Submit Report</span>
+      <span *ngIf="isLoading()">Submitting...</span>
+    </button>
+  </ng-container>
+</div>

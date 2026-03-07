@@ -99,7 +99,7 @@ export class LoginComponent {
 
   private _onSuccess(): void {
     this.isLoading.set(false);
-    this.router.navigateByUrl(this.returnUrl);
+    this.auth.redirectAfterLogin(this.returnUrl);
   }
 
   private _friendlyError(err: any): string {

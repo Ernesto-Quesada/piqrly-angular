@@ -20,10 +20,12 @@ import { environment } from '../environments/environment';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { provideAuth, getAuth } from '@angular/fire/auth';
 import { authInterceptor } from './interceptors/auth.interceptor';
+import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     ...appStoreProviders,
+    MatBottomSheetModule,
     provideHttpClient(withInterceptors([authInterceptor])),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),

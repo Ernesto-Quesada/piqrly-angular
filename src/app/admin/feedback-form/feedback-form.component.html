@@ -1,0 +1,114 @@
+<!-- feedback-form.component.html -->
+
+<!-- ✅ TAB on right edge -->
+<ng-container *ngIf="!isModalOpen">
+  <ng-container *ngIf="!isAdmin">
+    <div class="feedback-tab" (click)="togglePanel()" [class.open]="isOpen()">
+      <mat-icon class="tab-icon">rate_review</mat-icon>
+      <span class="tab-label">Feedback</span>
+    </div>
+
+    <!-- ✅ SLIDE-OUT PANEL -->
+    <div class="feedback-panel" [class.open]="isOpen()">
+      <div class="panel-inner">
+        <!-- HEADER -->
+        <div class="panel-header">
+          <div class="panel-title">
+            <mat-icon>rate_review</mat-icon>
+            <span>Send Feedback</span>
+          </div>
+          <button mat-icon-button class="close-btn" (click)="togglePanel()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <!-- SUCCESS STATE -->
+        <div class="success-state" *ngIf="submitted()">
+          <mat-icon class="success-icon">check_circle</mat-icon>
+          <div class="success-title">Thank you!</div>
+          <div class="success-sub">Your feedback has been submitted.</div>
+        </div>
+
+        <!-- FORM -->
+        <ng-container *ngIf="!submitted()">
+          <!-- TYPE SELECTOR -->
+          <div class="field">
+            <div class="field-label">Type</div>
+            <div class="type-row">
+              <button
+                *ngFor="let t of subtypes"
+                type="button"
+                class="type-btn"
+                [class.active]="subtype === t.value"
+                (click)="subtype = t.value"
+              >
+                <mat-icon>{{ t.icon }}</mat-icon>
+                <span>{{ t.label }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- RATING -->
+          <div class="field">
+            <div class="field-label">
+              Rating <span class="optional">(optional)</span>
+            </div>
+            <div class="stars-row">
+              <button
+                *ngFor="let star of stars"
+                type="button"
+                class="star-btn"
+                [class.filled]="rating !== null && star <= rating"
+                (click)="setRating(star)"
+              >
+                <mat-icon>{{
+                  rating !== null && star <= rating ? "star" : "star_border"
+                }}</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <!-- MESSAGE -->
+          <div class="field">
+            <div class="field-label">Message</div>
+            <textarea
+              class="message-input"
+              [(ngModel)]="message"
+              placeholder="Tell us what you think..."
+              rows="4"
+              [disabled]="isLoading()"
+            ></textarea>
+          </div>
+
+          <!-- ERROR -->
+          <div class="error-msg" *ngIf="errorMsg()">
+            {{ errorMsg() }}
+          </div>
+
+          <!-- SUBMIT -->
+          <button
+            type="button"
+            class="submit-btn"
+            (click)="submit()"
+            [disabled]="isLoading()"
+          >
+            <mat-spinner
+              *ngIf="isLoading()"
+              diameter="18"
+              color="accent"
+            ></mat-spinner>
+            <span *ngIf="!isLoading()">Send Feedback</span>
+            <span *ngIf="isLoading()">Sending...</span>
+          </button>
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- ✅ BACKDROP (mobile) -->
+    <div
+      class="feedback-backdrop"
+      *ngIf="isOpen()"
+      (click)="togglePanel()"
+    ></div>
+  </ng-container>
+</ng-container>

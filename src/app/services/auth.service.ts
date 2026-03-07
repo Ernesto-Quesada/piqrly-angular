@@ -20,11 +20,10 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
 
-  // ✅ Observable of the current Firebase user (null when logged out)
   currentUser$ = user(this.auth);
 
-  // ✅ Token key in localStorage
   private readonly TOKEN_KEY = 'access_token';
+  private readonly ROLE_KEY = 'user_role';
 
   // -------------------------
   // Public helpers
@@ -36,6 +35,14 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return !!this.getToken();
+  }
+
+  getRole(): string | null {
+    return localStorage.getItem(this.ROLE_KEY);
+  }
+
+  isAdmin(): boolean {
+    return this.getRole() === 'ADMIN';
   }
 
   // -------------------------
@@ -71,12 +78,26 @@ export class AuthService {
   // -------------------------
   logout(): void {
     localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.ROLE_KEY);
     signOut(this.auth);
     this.router.navigate(['/']);
   }
 
   // -------------------------
-  // Private: exchange Firebase token → backend JWT
+  // Redirect based on role
+  // Called from LoginComponent after successful login
+  // -------------------------
+  redirectAfterLogin(returnUrl: string = '/'): void {
+    const role = this.getRole();
+    if (role === 'ADMIN') {
+      this.router.navigate(['/admin/feedback']);
+    } else {
+      this.router.navigateByUrl(returnUrl);
+    }
+  }
+
+  // -------------------------
+  // Private: exchange Firebase token → backend JWT → fetch role
   // -------------------------
   private _exchangeForBackendJwt(cred: UserCredential): Observable<string> {
     return from(cred.user.getIdToken()).pipe(
@@ -86,19 +107,33 @@ export class AuthService {
       switchMap((firebaseToken) =>
         this.http.post<{ accessToken: string }>(
           `${environment.apiBaseUrl}/api/auth/login`,
-          {}, // ✅ empty body
+          {},
           {
             headers: {
-              Authorization: `Bearer ${firebaseToken}`, // ✅ token in header
+              Authorization: `Bearer ${firebaseToken}`,
             },
           },
         ),
       ),
       tap((res) => {
-        // ✅ backend returns accessToken not token
         localStorage.setItem(this.TOKEN_KEY, res.accessToken);
       }),
-      switchMap((res) => [res.accessToken]),
+      // ✅ after storing JWT fetch role from /api/profile/me
+      switchMap((res) =>
+        this.http
+          .get<{
+            email: string;
+            role: string;
+          }>(`${environment.apiBaseUrl}/api/profile/me`)
+          .pipe(
+            tap((profile) => {
+              localStorage.setItem(this.ROLE_KEY, profile.role);
+              console.log('✅ Role stored:', profile.role);
+            }),
+            // return the access token to keep Observable<string> type
+            switchMap(() => [res.accessToken]),
+          ),
+      ),
     );
   }
 }

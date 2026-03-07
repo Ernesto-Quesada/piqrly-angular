@@ -1,6 +1,17 @@
 <!-- Top fixed icons -->
 <div class="simple-topbar">
   <button type="button" class="icon-btn" (click)="closeModal()">←</button>
+
+  <!-- ✅ Report flag — only shown to logged in users -->
+  <button
+    *ngIf="isLoggedIn"
+    type="button"
+    class="icon-btn report-btn"
+    (click)="openReport()"
+    title="Report this photo"
+  >
+    <mat-icon>flag</mat-icon>
+  </button>
 </div>
 
 <!-- ✅ Simple swipe carousel -->

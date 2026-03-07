@@ -358,3 +358,10 @@ mat-sidenav,
 .simple-carousel-bottombar button {
   pointer-events: auto;
 }
+.report-bottom-sheet .mat-bottom-sheet-container {
+  border-radius: 20px 20px 0 0;
+  padding: 0;
+}
+.cdk-overlay-container:has(.image-modal-fullscreen) app-feedback-form {
+  display: none !important;
+}

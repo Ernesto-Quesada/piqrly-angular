@@ -128,3 +128,43 @@
 ::ng-deep .icon-bubble .material-icons-outlined {
   color: #fff !important;
 }
+.nav-divider {
+  margin: 8px 10px;
+}
+
+.nav-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #94a3b8;
+  padding: 6px 16px 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-label {
+  color: #2BBDEE;
+}
+
+.admin-badge-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  color: #2BBDEE !important;
+}
+
+.admin-item {
+  border-left: 2px solid rgba(43, 189, 238, 0.30);
+  margin-left: 10px !important;
+}
+.sidenav-footer {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
