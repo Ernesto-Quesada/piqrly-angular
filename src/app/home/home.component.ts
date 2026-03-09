@@ -33,13 +33,17 @@ export class HomeComponent {
   get isMobile(): boolean {
     return window.innerWidth <= 768;
   }
-  get heroImages(): string[] {
+  heroSlides = [
+    { url: 'assets/landing/hero-1', focalPoint: 'center center' },
+    { url: 'assets/landing/hero-2', focalPoint: '30% 50%' }, // focus lower
+    { url: 'assets/landing/hero-3', focalPoint: 'center 70%' }, // focus upper
+  ];
+  get heroImages() {
     const suffix = this.isMobile ? 'S' : 'L';
-    return [
-      `assets/landing/hero-1-${suffix}.webp`,
-      `assets/landing/hero-2-${suffix}.webp`,
-      `assets/landing/hero-3-${suffix}.webp`,
-    ];
+    return this.heroSlides.map((s) => ({
+      url: `${s.url}-${suffix}.webp`,
+      focalPoint: s.focalPoint,
+    }));
   }
   // seconds per slide
   slideDuration = 5;

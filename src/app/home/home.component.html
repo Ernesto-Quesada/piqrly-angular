@@ -11,8 +11,9 @@
       -->
       <div
         class="bg-slide"
-        *ngFor="let img of heroImages; let i = index"
-        [style.backgroundImage]="'url(' + img + ')'"
+        *ngFor="let slide of heroImages; let i = index"
+        [style.backgroundImage]="'url(' + slide.url + ')'"
+        [style.backgroundPosition]="slide.focalPoint"
         [style.animationDelay]="i * slideDuration + 's'"
       ></div>
     </div>
