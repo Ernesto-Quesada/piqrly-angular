@@ -25,12 +25,22 @@ export class HomeComponent {
   inviteForm;
 
   submitted = signal(false);
-  heroImages = [
-    '/assets/landing/granada.jpg',
-    '/assets/landing/machupichu.jpg',
-    '/assets/landing/theqbros.jpg',
-  ];
-
+  // heroImages = [
+  //   '/assets/landing/granada.jpg',
+  //   '/assets/landing/machupichu.jpg',
+  //   '/assets/landing/theqbros.jpg',
+  // ];
+  get isMobile(): boolean {
+    return window.innerWidth <= 768;
+  }
+  get heroImages(): string[] {
+    const suffix = this.isMobile ? 'S' : 'L';
+    return [
+      `assets/landing/hero-1-${suffix}.webp`,
+      `assets/landing/hero-2-${suffix}.webp`,
+      `assets/landing/hero-3-${suffix}.webp`,
+    ];
+  }
   // seconds per slide
   slideDuration = 5;
 
