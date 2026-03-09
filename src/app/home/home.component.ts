@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, HostListener, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -25,22 +25,26 @@ export class HomeComponent {
   inviteForm;
 
   submitted = signal(false);
-  // heroImages = [
-  //   '/assets/landing/granada.jpg',
-  //   '/assets/landing/machupichu.jpg',
-  //   '/assets/landing/theqbros.jpg',
-  // ];
-  get isMobile(): boolean {
-    return window.innerWidth <= 768;
-  }
-  heroSlides = [
+  heroImages: { url: string; focalPoint: string }[] = [];
+
+  private heroSlides = [
     { url: 'assets/landing/hero-1', focalPoint: 'center center' },
-    { url: 'assets/landing/hero-2', focalPoint: '30% 50%' }, // focus lower
-    { url: 'assets/landing/hero-3', focalPoint: 'center 70%' }, // focus upper
+    { url: 'assets/landing/hero-2', focalPoint: '30% 50%' },
+    { url: 'assets/landing/hero-3', focalPoint: 'center 70%' },
   ];
-  get heroImages() {
-    const suffix = this.isMobile ? 'S' : 'L';
-    return this.heroSlides.map((s) => ({
+
+  ngOnInit(): void {
+    this.setHeroImages();
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    this.setHeroImages();
+  }
+
+  private setHeroImages(): void {
+    const suffix = window.innerWidth <= 768 ? 'S' : 'L';
+    this.heroImages = this.heroSlides.map((s) => ({
       url: `${s.url}-${suffix}.webp`,
       focalPoint: s.focalPoint,
     }));

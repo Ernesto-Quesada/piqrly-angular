@@ -12,7 +12,6 @@
     <mat-sidenav
       #sidenav
       [mode]="isDesktop ? 'side' : 'over'"
-      [(opened)]="opened"
       class="shell-sidenav"
     >
       <!-- SIDEBAR HEADER (MOBILE ONLY BRAND) -->
@@ -121,6 +120,16 @@
 
       <!-- FOOTER -->
       <div class="sidenav-footer">
+        <!-- ✅ Logout in sidebar when logged in -->
+        <a
+          *ngIf="isLoggedIn"
+          class="footer-link footer-link--logout"
+          (click)="logout()"
+        >
+          <mat-icon>logout</mat-icon>
+          <span>Logout</span>
+        </a>
+
         <a class="footer-link" routerLink="/contact">
           <mat-icon>mail_outline</mat-icon>
           <span>Contact Us</span>
@@ -178,28 +187,28 @@
               style="width: 44px; height: 44px"
             ></div>
 
-            <!-- LOGOUT -->
+            <!-- ✅ LOGOUT — shows when logged in -->
             <button
               *ngIf="isLoggedIn"
-              mat-icon-button
-              class="icon-bubble"
+              mat-button
+              class="auth-btn auth-btn--logout"
               (click)="logout()"
               aria-label="Logout"
-              title="Logout"
             >
               <mat-icon>logout</mat-icon>
+              <span>Logout</span>
             </button>
 
-            <!-- LOGIN -->
+            <!-- ✅ LOGIN — shows when logged out -->
             <button
               *ngIf="!isLoggedIn"
-              mat-icon-button
-              class="icon-bubble"
+              mat-button
+              class="auth-btn auth-btn--login"
               (click)="goToLogin()"
               aria-label="Login"
-              title="Login"
             >
               <mat-icon>login</mat-icon>
+              <span>Login</span>
             </button>
           </div>
         </div>

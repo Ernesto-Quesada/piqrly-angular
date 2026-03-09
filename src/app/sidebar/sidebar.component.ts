@@ -114,7 +114,7 @@ export class SidebarComponent implements OnInit {
 
   toggleSidenav(sidenav: any) {
     sidenav.toggle();
-    this.opened = !this.opened;
+    //this.opened = !this.opened;
   }
 
   logout(): void {

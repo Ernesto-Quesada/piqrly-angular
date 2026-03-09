@@ -168,3 +168,51 @@
   flex-direction: column;
   gap: 6px;
 }
+/* Add these to sidebar.component.scss */
+
+/* ✅ Auth button (Login / Logout) in header */
+.auth-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 999px !important;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: var(--shadow);
+  transition: opacity 0.2s;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover { opacity: 0.88; }
+
+  &--login {
+    background: var(--app-primary, #2BBDEE) !important;
+    color: #fff !important;
+  }
+
+  &--logout {
+    background: rgba(62, 176, 252, 0.412) !important;
+    color: var(--text) !important;
+  }
+}
+
+/* ✅ Logout link in sidebar footer */
+.footer-link--logout {
+  cursor: pointer;
+  color: #0f172a!important;
+  background: rgba(236, 202, 79, 0.06) !important;
+
+  mat-icon { color: #e53e3e !important; }
+
+  &:hover { background: rgba(229, 62, 62, 0.12) !important; }
+}
+.shell-content {
+  background: var(--bg);
+  will-change: transform; // ✅ forces GPU layer, prevents reflow blink
+}
