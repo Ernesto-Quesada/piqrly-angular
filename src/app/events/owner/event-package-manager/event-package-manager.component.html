@@ -1,0 +1,96 @@
+<!-- src/app/my-events/event-packages-manager/event-packages-manager.component.html -->
+<div class="events-page">
+  <!-- Header -->
+  <div class="page-header">
+    <button mat-icon-button (click)="back()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div class="page-header-text">
+      <h2>Packages</h2>
+      <p>{{ event?.eventName }}</p>
+    </div>
+  </div>
+
+  <!-- Loading event -->
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Loading…</p>
+  </div>
+
+  <ng-container *ngIf="!loading && event">
+    <!-- Create package form -->
+    <div class="pkg-create-card" *ngIf="packages.length < 3">
+      <div class="pkg-create-title">Add Package</div>
+      <form [formGroup]="packageForm" (ngSubmit)="savePackage()">
+        <div class="form-field">
+          <label>Package Name *</label>
+          <input
+            type="text"
+            formControlName="name"
+            placeholder="e.g. Basic — 5 Photos"
+          />
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label>Photo Limit *</label>
+            <input type="number" formControlName="quantity" min="1" max="50" />
+          </div>
+          <div class="form-field">
+            <label>Price ($) *</label>
+            <input
+              type="number"
+              formControlName="price"
+              min="0.01"
+              step="0.01"
+              placeholder="e.g. 20.00"
+            />
+          </div>
+        </div>
+        <button
+          type="submit"
+          mat-raised-button
+          class="btn-primary"
+          [disabled]="packageForm.invalid || pkgSaving"
+        >
+          {{ pkgSaving ? "Saving…" : "Add Package" }}
+        </button>
+      </form>
+    </div>
+
+    <div class="pkg-limit-note" *ngIf="packages.length >= 3">
+      <mat-icon>info_outline</mat-icon>
+      Maximum 3 packages per event reached.
+    </div>
+
+    <!-- Loading packages -->
+    <div class="loading-state" *ngIf="pkgLoading">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- Package list -->
+    <div class="pkg-list" *ngIf="!pkgLoading && packages.length > 0">
+      <div class="pkg-item" *ngFor="let pkg of packages">
+        <div class="pkg-item-info">
+          <div class="pkg-item-name">{{ pkg.name }}</div>
+          <div class="pkg-item-detail">
+            Up to {{ pkg.quantity }} full-size photos · ${{
+              pkg.price | number: "1.2-2"
+            }}
+          </div>
+        </div>
+        <button
+          mat-icon-button
+          class="btn-delete-pkg"
+          (click)="deletePackage(pkg)"
+        >
+          <mat-icon>delete_outline</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="!pkgLoading && packages.length === 0">
+      <mat-icon>inventory_2</mat-icon>
+      <p>No packages yet. Add your first one above.</p>
+    </div>
+  </ng-container>
+</div>

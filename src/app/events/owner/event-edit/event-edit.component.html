@@ -1,0 +1,155 @@
+<!-- src/app/my-events/event-form/event-form.component.html -->
+<div class="events-page">
+  <div class="page-header">
+    <button mat-icon-button (click)="cancel()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div class="page-header-text">
+      <h2>{{ isEdit ? "Edit Event" : "New Event" }}</h2>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Loading…</p>
+  </div>
+
+  <form
+    class="event-form"
+    [formGroup]="form"
+    (ngSubmit)="save()"
+    *ngIf="!loading"
+  >
+    <div class="form-section">
+      <div class="form-section-title">Event Details</div>
+      <div class="form-field">
+        <label>Event Name *</label>
+        <input
+          type="text"
+          formControlName="eventName"
+          placeholder="e.g. Wedding Photo Session"
+        />
+      </div>
+      <div class="form-field">
+        <label>Address</label>
+        <input
+          type="text"
+          formControlName="eventAddress"
+          placeholder="e.g. 123 Main St, Miami FL"
+        />
+      </div>
+      <div class="form-field">
+        <label>Date *</label>
+        <input type="date" formControlName="eventDate" />
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Contact Info</div>
+      <div class="form-field">
+        <label>Contact Name</label>
+        <input
+          type="text"
+          formControlName="contactName"
+          placeholder="Your name"
+        />
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Phone</label>
+          <input
+            type="tel"
+            formControlName="contactPhone"
+            placeholder="+1 (555) 000-0000"
+          />
+        </div>
+        <div class="form-field">
+          <label>Email</label>
+          <input
+            type="email"
+            formControlName="contactEmail"
+            placeholder="you@email.com"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Settings</div>
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <div class="toggle-label">Public Event</div>
+          <div class="toggle-sub">Anyone with the link can view</div>
+        </div>
+        <mat-slide-toggle formControlName="isPublic"></mat-slide-toggle>
+      </div>
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <div class="toggle-label">Photos for Sale</div>
+          <div class="toggle-sub">Visitors can purchase photos</div>
+        </div>
+        <mat-slide-toggle formControlName="forSale"></mat-slide-toggle>
+      </div>
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <div class="toggle-label">Allow Guest Uploads</div>
+          <div class="toggle-sub">Guests can add photos to this event</div>
+        </div>
+        <mat-slide-toggle
+          formControlName="allowGuestUploads"
+        ></mat-slide-toggle>
+      </div>
+    </div>
+
+    <div class="form-section" *ngIf="forSaleValue">
+      <div class="form-section-title">Pricing (optional override)</div>
+      <p class="form-hint">Leave blank to use your default pricing</p>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Small ($)</label>
+          <input
+            type="number"
+            formControlName="eventPriceSmall"
+            placeholder="e.g. 5.00"
+            min="0"
+            step="0.01"
+          />
+        </div>
+        <div class="form-field">
+          <label>Full ($)</label>
+          <input
+            type="number"
+            formControlName="eventPriceFull"
+            placeholder="e.g. 15.00"
+            min="0"
+            step="0.01"
+          />
+        </div>
+        <div class="form-field">
+          <label>Royalty ($)</label>
+          <input
+            type="number"
+            formControlName="eventPriceRoyalty"
+            placeholder="e.g. 50.00"
+            min="0"
+            step="0.01"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" mat-stroked-button (click)="cancel()">
+        Cancel
+      </button>
+      <button
+        type="submit"
+        mat-raised-button
+        class="btn-primary"
+        [disabled]="form.invalid || saving"
+      >
+        {{ saving ? "Saving…" : isEdit ? "Save Changes" : "Create Event" }}
+      </button>
+    </div>
+  </form>
+</div>

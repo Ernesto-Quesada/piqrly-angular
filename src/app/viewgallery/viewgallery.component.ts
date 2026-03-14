@@ -480,7 +480,9 @@ export class ViewGalleryComponent implements OnInit, OnDestroy {
       }, 0);
 
       sessionStorage.setItem('gallery_checkout_total', String(total));
-      console.log('🧾 GALLERY CHECKOUT TOTAL (computed):', total);
+
+      // ✅ Store galleryId so checkout component can include it in payload
+      sessionStorage.setItem('checkout_gallery_id', this.galleryId());
 
       sessionStorage.setItem('returnUrl', this.router.url);
       this.router.navigate(['/checkout']);

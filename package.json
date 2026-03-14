@@ -5,7 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "fone": "ng serve --host 192.168.170.189",
-    "runnAll": "ng serve --host 0.0.0.0 --port 4200",
+    "runAll": "ng serve --host 0.0.0.0 --port 4200",
     "build": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
@@ -29,8 +29,9 @@
     "@ngrx/store-devtools": "^19.1.0",
     "@stripe/stripe-js": "^8.7.0",
     "bootstrap": "^5.3.3",
-    "firebase": "^12.10.0",
+    "firebase": "^11.10.0",
     "ngx-stripe": "^19.8.0",
+    "qrcode": "^1.5.4",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
@@ -40,6 +41,7 @@
     "@angular/cli": "^19.2.1",
     "@angular/compiler-cli": "^19.2.1",
     "@types/jasmine": "~5.1.0",
+    "@types/qrcode": "^1.5.6",
     "jasmine-core": "~5.2.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",

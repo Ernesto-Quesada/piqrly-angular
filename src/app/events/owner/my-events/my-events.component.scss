@@ -1,0 +1,396 @@
+// src/app/my-events/my-events.component.scss
+
+.events-page {
+  max-width: 860px; // ✅ wider card
+  margin: 0 auto;
+  padding: 20px 16px 80px;
+}
+
+// ─── Header ───────────────────────────────────────────────────────────────────
+
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+
+  .page-header-text {
+    flex: 1;
+    h2 { margin: 0; font-size: 1.4rem; font-weight: 700; color: #1a1a1a; }
+    p  { margin: 0; font-size: 0.9rem; color: #888; }
+  }
+
+  .btn-primary {
+    background: #1976d2;
+    color: white;
+    border-radius: 20px;
+    height: 42px;
+    font-size: 0.92rem;
+    white-space: nowrap;
+  }
+
+  // ✅ bigger fonts on desktop only
+  @media (min-width: 768px) {
+    h2 { font-size: 1.7rem !important; }
+    p  { font-size: 1rem !important; }
+  }
+}
+
+// ─── States ───────────────────────────────────────────────────────────────────
+
+.loading-state, .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 16px;
+  color: #aaa;
+  text-align: center;
+
+  mat-icon { font-size: 48px; width: 48px; height: 48px; }
+  p { margin: 0; font-size: 1rem; }
+}
+
+.spinner {
+  width: 36px; height: 36px;
+  border: 3px solid #e0e0e0;
+  border-top-color: #1976d2;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+// ─── Event list ───────────────────────────────────────────────────────────────
+
+.event-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.event-card {
+  background: white;
+  border: 1px solid #e8e8e8;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+
+  .event-card-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 16px 12px;
+  }
+
+  .event-card-info { flex: 1; }
+
+  .event-name {
+    font-size: 1.08rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 6px;
+
+    @media (min-width: 768px) { font-size: 1.2rem; } // ✅ desktop
+  }
+
+  .event-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 8px;
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.86rem;
+      color: #777;
+
+      @media (min-width: 768px) { font-size: 0.95rem; } // ✅ desktop
+
+      .mini { font-size: 14px; width: 14px; height: 14px; }
+    }
+  }
+
+  .event-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .event-card-qr {
+    .qr-code {
+      font-size: 0.75rem;
+      background: #f5f5f5;
+      color: #555;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-family: monospace;
+      white-space: nowrap;
+    }
+  }
+
+  .event-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px 14px;
+    border-top: 1px solid #f0f0f0;
+    flex-wrap: wrap;
+
+    .btn-delete {
+      margin-left: auto;
+    }
+  }
+}
+
+// ─── Badges ───────────────────────────────────────────────────────────────────
+
+.badge {
+  font-size: 0.75rem;
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-weight: 500;
+
+  @media (min-width: 768px) { font-size: 0.82rem; } // ✅ desktop
+
+  &.badge-status        { background: #e3f2fd; color: #1565c0; }
+  &.badge-status.active { background: #e8f5e9; color: #2e7d32; }
+  &.badge-sale          { background: #fff3e0; color: #e65100; }
+  &.badge-public        { background: #f3e5f5; color: #6a1b9a; }
+  &.badge-private       { background: #fafafa; color: #777; border: 1px solid #e0e0e0; }
+}
+
+// ─── Action buttons ───────────────────────────────────────────────────────────
+
+.btn-action {
+  height: 36px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-radius: 18px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #333 !important;
+  border-color: #d0d0d0 !important;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: #333;
+  }
+
+  @media (min-width: 768px) { font-size: 0.95rem; } // ✅ desktop
+
+  // ✅ packages button — restored to original color (no override)
+  &.btn-packages {
+    color: #333 !important;
+    border-color: #d0d0d0 !important;
+
+    mat-icon { color: #333; }
+
+    .premium-lock {
+      margin-left: 2px;
+      .lock-icon { font-size: 14px; width: 14px; height: 14px; color: #f57c00; }
+    }
+  }
+
+  &.btn-delete {
+    color: #c62828 !important;
+    border-color: #ffcdd2 !important;
+
+    mat-icon { color: #c62828; }
+  }
+}
+
+// ─── Form ─────────────────────────────────────────────────────────────────────
+
+.event-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-section {
+  background: white;
+  border: 1px solid #e8e8e8;
+  border-radius: 16px;
+  padding: 18px;
+
+  .form-section-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #999;
+    margin-bottom: 14px;
+  }
+
+  .form-hint {
+    font-size: 0.84rem;
+    color: #aaa;
+    margin: -8px 0 12px;
+  }
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 12px;
+
+  &:last-child { margin-bottom: 0; }
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #444;
+
+    @media (min-width: 768px) { font-size: 0.95rem; } // ✅ desktop
+  }
+
+  input {
+    height: 44px;
+    padding: 0 14px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    color: #1a1a1a;
+    outline: none;
+    transition: border-color 0.15s;
+
+    @media (min-width: 768px) { font-size: 1.05rem; } // ✅ desktop
+
+    &:focus { border-color: #1976d2; }
+    &::placeholder { color: #bbb; }
+  }
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+
+  @media (max-width: 420px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #f5f5f5;
+
+  &:last-child { border-bottom: none; }
+
+  .toggle-info {
+    .toggle-label { font-size: 0.95rem; font-weight: 500; color: #1a1a1a; }
+    .toggle-sub   { font-size: 0.82rem; color: #aaa; margin-top: 2px; }
+
+    @media (min-width: 768px) {
+      .toggle-label { font-size: 1.05rem; } // ✅ desktop
+      .toggle-sub   { font-size: 0.9rem; }
+    }
+  }
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+
+  .btn-primary {
+    background: #1976d2;
+    color: white;
+    border-radius: 20px;
+    height: 44px;
+    padding: 0 28px;
+    font-size: 0.95rem;
+  }
+}
+
+// ─── Packages view ────────────────────────────────────────────────────────────
+
+.premium-gate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 48px 24px;
+  text-align: center;
+  color: #888;
+
+  mat-icon { font-size: 48px; width: 48px; height: 48px; color: #f57c00; }
+  h3 { margin: 0; color: #1a1a1a; font-size: 1.1rem; }
+  p  { margin: 0; font-size: 0.9rem; }
+}
+
+.pkg-create-card {
+  background: white;
+  border: 1px solid #e8e8e8;
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 18px;
+
+  .pkg-create-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #999;
+    margin-bottom: 14px;
+  }
+
+  .btn-primary {
+    margin-top: 6px;
+    background: #1976d2;
+    color: white;
+    border-radius: 20px;
+    height: 42px;
+    padding: 0 22px;
+    font-size: 0.92rem;
+  }
+}
+
+.pkg-limit-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: #888;
+  padding: 12px 16px;
+  background: #f9f9f9;
+  border-radius: 10px;
+  margin-bottom: 14px;
+
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+}
+
+.pkg-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pkg-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: white;
+  border: 1px solid #e8e8e8;
+  border-radius: 14px;
+
+  .pkg-item-info { flex: 1; }
+  .pkg-item-name   { font-size: 1rem; font-weight: 600; color: #1a1a1a; }
+  .pkg-item-detail { font-size: 0.84rem; color: #888; margin-top: 3px; }
+
+  .btn-delete-pkg {
+    color: #c62828;
+    mat-icon { color: #c62828; }
+  }
+}

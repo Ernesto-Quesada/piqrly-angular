@@ -43,6 +43,7 @@ import {
 } from '../store/actions/shopcart.actions';
 import { selectItems } from '../store/selectors/shopcart.selector';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { SaveCodeBannerComponent } from '../save-code-banner/save-code-banner.component';
 
 type Size = 'small' | 'full' | 'royalty';
 type LandingAny = any;
@@ -56,6 +57,7 @@ type LandingAny = any;
     MatIconModule,
     MatButtonModule,
     MatSnackBarModule,
+    SaveCodeBannerComponent,
   ],
   templateUrl: './viewpic.component.html',
   styleUrl: './viewpic.component.scss',
@@ -113,6 +115,9 @@ export class ViewpicComponent implements OnInit, OnDestroy {
     private snackBar: MatSnackBar,
   ) {
     this.cartItems$ = this.storeShopCart.pipe(select(selectItems));
+  }
+  get currentUrl(): string {
+    return window.location.href;
   }
 
   ngOnInit() {

@@ -24,6 +24,7 @@ export class AuthService {
 
   private readonly TOKEN_KEY = 'access_token';
   private readonly ROLE_KEY = 'user_role';
+  private readonly PREMIUM_KEY = 'is_premium';
 
   // -------------------------
   // Public helpers
@@ -43,6 +44,11 @@ export class AuthService {
 
   isAdmin(): boolean {
     return this.getRole() === 'ADMIN';
+  }
+
+  // ✅ Premium check — stored on login, readable anywhere
+  isPremium(): boolean {
+    return localStorage.getItem(this.PREMIUM_KEY) === 'true';
   }
 
   // -------------------------
@@ -79,13 +85,13 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.ROLE_KEY);
+    localStorage.removeItem(this.PREMIUM_KEY); // ✅ clear premium on logout
     signOut(this.auth);
     this.router.navigate(['/']);
   }
 
   // -------------------------
   // Redirect based on role
-  // Called from LoginComponent after successful login
   // -------------------------
   redirectAfterLogin(returnUrl: string = '/'): void {
     const role = this.getRole();
@@ -97,7 +103,7 @@ export class AuthService {
   }
 
   // -------------------------
-  // Private: exchange Firebase token → backend JWT → fetch role
+  // Private: exchange Firebase token → backend JWT → fetch role + premium
   // -------------------------
   private _exchangeForBackendJwt(cred: UserCredential): Observable<string> {
     return from(cred.user.getIdToken()).pipe(
@@ -108,29 +114,34 @@ export class AuthService {
         this.http.post<{ accessToken: string }>(
           `${environment.apiBaseUrl}/api/auth/login`,
           {},
-          {
-            headers: {
-              Authorization: `Bearer ${firebaseToken}`,
-            },
-          },
+          { headers: { Authorization: `Bearer ${firebaseToken}` } },
         ),
       ),
       tap((res) => {
         localStorage.setItem(this.TOKEN_KEY, res.accessToken);
       }),
-      // ✅ after storing JWT fetch role from /api/profile/me
       switchMap((res) =>
         this.http
           .get<{
             email: string;
             role: string;
+            premium: boolean;
           }>(`${environment.apiBaseUrl}/api/profile/me`)
           .pipe(
             tap((profile) => {
               localStorage.setItem(this.ROLE_KEY, profile.role);
-              console.log('✅ Role stored:', profile.role);
+              // ✅ store premium flag for use across the app
+              localStorage.setItem(
+                this.PREMIUM_KEY,
+                String(profile.premium ?? false),
+              );
+              console.log(
+                '✅ Role stored:',
+                profile.role,
+                '| Premium:',
+                profile.premium,
+              );
             }),
-            // return the access token to keep Observable<string> type
             switchMap(() => [res.accessToken]),
           ),
       ),

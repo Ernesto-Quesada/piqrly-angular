@@ -1,0 +1,128 @@
+<!-- src/app/event-packages/event-packages.component.html -->
+
+<!-- Loading -->
+<div class="pkg-loading" *ngIf="loading">
+  <div class="spinner"></div>
+</div>
+
+<!-- Error -->
+<div class="pkg-error" *ngIf="loadError && !loading">
+  <mat-icon>error_outline</mat-icon>
+  <p>{{ loadError }}</p>
+</div>
+
+<!-- No packages -->
+<div class="pkg-empty" *ngIf="!loading && !loadError && packages.length === 0">
+  <mat-icon>inventory_2</mat-icon>
+  <p>No packages available for this event.</p>
+</div>
+
+<!-- =====================================================================
+     PACKAGE LIST — user picks a package
+     ===================================================================== -->
+<ng-container
+  *ngIf="!loading && !loadError && packages.length > 0 && !selectedPackage"
+>
+  <div class="pkg-list-header">
+    <h3>Available Packages</h3>
+    <p class="pkg-list-sub">Choose a package to get started</p>
+  </div>
+
+  <div class="pkg-list">
+    <button
+      *ngFor="let pkg of packages"
+      class="pkg-card"
+      type="button"
+      (click)="selectPackage(pkg)"
+    >
+      <div class="pkg-card-info">
+        <div class="pkg-card-name">{{ pkg.name }}</div>
+        <div class="pkg-card-detail">
+          Up to {{ pkg.quantity }} full-size photos
+        </div>
+      </div>
+      <div class="pkg-card-price">${{ pkg.price | number: "1.2-2" }}</div>
+      <mat-icon class="pkg-card-arrow">chevron_right</mat-icon>
+    </button>
+  </div>
+</ng-container>
+
+<!-- =====================================================================
+     PHOTO SELECTION — user picks photos for the chosen package
+     ===================================================================== -->
+<ng-container *ngIf="selectedPackage">
+  <!-- Header -->
+  <div class="sel-header">
+    <button mat-icon-button (click)="backToPackageList()" type="button">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div class="sel-header-text">
+      <div class="sel-title">{{ selectedPackage.name }}</div>
+      <div class="sel-sub">
+        ${{ selectedPackage.price | number: "1.2-2" }} · full size
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="sel-progress">
+    <div class="sel-progress-label">
+      <span
+        >{{ selectedIds.size }} of {{ selectedPackage.quantity }} selected</span
+      >
+      <span class="remaining" *ngIf="!atLimit">{{ remaining }} remaining</span>
+      <span class="at-limit" *ngIf="atLimit">Limit reached</span>
+    </div>
+    <div class="sel-progress-bar">
+      <div
+        class="sel-progress-fill"
+        [style.width.%]="(selectedIds.size / selectedPackage.quantity) * 100"
+      ></div>
+    </div>
+  </div>
+
+  <!-- Instruction -->
+  <div class="sel-hint" *ngIf="selectedIds.size === 0">
+    Tap photos to select up to {{ selectedPackage.quantity }} for this package.
+  </div>
+
+  <!-- Photo grid -->
+  <div class="sel-grid">
+    <button
+      *ngFor="let img of images"
+      class="sel-img-card"
+      [class.selected]="isSelected(img.pictureId)"
+      [class.dimmed]="atLimit && !isSelected(img.pictureId)"
+      (click)="togglePhoto(img.pictureId)"
+      type="button"
+    >
+      <img [src]="img.previewImageUrl" [alt]="'photo'" />
+      <div class="sel-overlay" *ngIf="isSelected(img.pictureId)">
+        <mat-icon>check_circle</mat-icon>
+      </div>
+    </button>
+  </div>
+
+  <!-- Sticky checkout bar -->
+  <div class="sel-sticky" *ngIf="selectedIds.size > 0">
+    <div class="sel-sticky-info">
+      <span class="sel-sticky-count"
+        >{{ selectedIds.size }} photo{{
+          selectedIds.size > 1 ? "s" : ""
+        }}
+        selected</span
+      >
+      <span class="sel-sticky-price"
+        >${{ selectedPackage.price | number: "1.2-2" }}</span
+      >
+    </div>
+    <button
+      mat-raised-button
+      class="btn-checkout"
+      [disabled]="paying"
+      (click)="checkout()"
+    >
+      {{ paying ? "Redirecting…" : "Checkout" }}
+    </button>
+  </div>
+</ng-container>

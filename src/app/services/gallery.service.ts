@@ -52,4 +52,14 @@ export class GalleryService {
       { pin },
     );
   }
+
+  // ✅ NEW: Gallery-only tier-aware paid zip
+  getTieredZipUrl(
+    galleryId: string,
+    sessionId: string,
+  ): Observable<{ url: string }> {
+    return this.http.get<{ url: string }>(
+      API.galleries.downloadTiered(galleryId, sessionId),
+    );
+  }
 }

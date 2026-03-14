@@ -16,6 +16,11 @@
             {{ (forSale$ | async) ? "Photos for Sale" : "Free Download" }}
           </ng-template>
         </div>
+        <!-- After </div> of top-card -->
+        <app-save-code-banner
+          [title]="eventName || 'Photos'"
+          [contextKey]="inviteCode || qr || ''"
+        ></app-save-code-banner>
 
         <!-- PRIVATE EVENT BLOCK (works even if owner is null) -->
         <div class="private-block" *ngIf="(isPrivateEvent$ | async) === true">

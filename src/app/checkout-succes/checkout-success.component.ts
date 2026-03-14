@@ -13,6 +13,7 @@ import { clearShopCart } from '../store/actions/shopcart.actions'; // <-- keep y
 
 import { CheckoutService } from './../services/checkout.service';
 import { PictureService } from '../services/picture.service';
+import { GalleryService } from '../services/gallery.service';
 
 @Component({
   selector: 'checkout-success',
@@ -52,6 +53,7 @@ export class CheckoutSuccessComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private checkoutService: CheckoutService,
     private pictureService: PictureService,
+    private galleryService: GalleryService,
     private store: Store,
     private router: Router,
     private snackBar: MatSnackBar,
@@ -174,6 +176,15 @@ export class CheckoutSuccessComponent implements OnInit, OnDestroy {
     this.router.navigateByUrl(url);
   }
 
+  private isGalleryFlow(): boolean {
+    return this.returnUrl.includes('/viewgallery/');
+  }
+
+  private extractGalleryIdFromReturnUrl(): string | null {
+    const match = this.returnUrl.match(/\/viewgallery\/([^/?#]+)/i);
+    return match?.[1] ?? null;
+  }
+
   fetchZipAndDownload(): void {
     if (!this.sessionId) return;
 
@@ -187,7 +198,25 @@ export class CheckoutSuccessComponent implements OnInit, OnDestroy {
 
       this.downloading = true;
 
-      this.pictureService.getPaidZipUrl(this.sessionId!).subscribe({
+      const isGallery = this.isGalleryFlow();
+      const galleryId = this.extractGalleryIdFromReturnUrl();
+
+      // ✅ IMPORTANT:
+      // If this is a Gallery flow, galleryId is mandatory.
+      // Do NOT fall back to legacy paid zip endpoint.
+      if (isGallery && !galleryId) {
+        this.downloading = false;
+        this.loading = false;
+        this.error =
+          'Gallery download could not start because the gallery ID is missing.';
+        return;
+      }
+
+      const request$ = isGallery
+        ? this.galleryService.getTieredZipUrl(galleryId!, this.sessionId!)
+        : this.pictureService.getPaidZipUrl(this.sessionId!);
+
+      request$.subscribe({
         next: (res) => {
           this.downloadUrl = res?.url || null;
 
@@ -198,26 +227,21 @@ export class CheckoutSuccessComponent implements OnInit, OnDestroy {
             return;
           }
 
-          // ✅ Clear cart (NgRx) + clear persisted cart
           this.store.dispatch(clearShopCart());
           this.clearPersistedCart();
 
           this.downloading = false;
           this.loading = false;
 
-          // ✅ DESKTOP: auto-start download is fine
           if (!this.isMobile) {
             this.downloadStarted = true;
             this.startDownload(this.downloadUrl);
             return;
           }
 
-          // ✅ MOBILE: do NOT auto-download.
-          // User will tap "Download again" (gesture)
           this.downloadStarted = false;
         },
         error: (err) => {
-          // ✅ If zip not ready yet, backend may return 409 -> retry
           if (err?.status === 409 && attempt < maxAttempts) {
             this.zipTimer = setTimeout(pollZip, delayMs);
             return;

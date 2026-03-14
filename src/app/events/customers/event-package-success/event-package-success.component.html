@@ -1,0 +1,47 @@
+<!-- src/app/event-package-success/event-package-success.component.html -->
+<div class="success-page">
+  <!-- Loading -->
+  <div class="center-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Confirming your purchase…</p>
+  </div>
+
+  <!-- Error -->
+  <div class="center-state error" *ngIf="error && !loading">
+    <mat-icon>error_outline</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-stroked-button (click)="goBackToEvent()">Back to event</button>
+  </div>
+
+  <!-- Success -->
+  <ng-container *ngIf="!loading && !error && status">
+    <div class="success-icon-wrap">
+      <mat-icon class="big-check">check_circle</mat-icon>
+    </div>
+
+    <h2>Purchase complete!</h2>
+    <p class="pkg-name">{{ status.packageName }}</p>
+    <p class="pkg-detail">
+      {{ status.selectedPictureIds.length }} photos — full size
+    </p>
+
+    <div class="download-area">
+      <p *ngIf="downloading">Preparing your download…</p>
+      <p *ngIf="!downloading">Your download should start automatically.</p>
+
+      <button
+        mat-raised-button
+        class="btn-download"
+        [disabled]="downloading"
+        (click)="download()"
+      >
+        <mat-icon>download</mat-icon>
+        {{ downloading ? "Preparing…" : "Download again" }}
+      </button>
+    </div>
+
+    <button mat-stroked-button class="btn-back" (click)="goBackToEvent()">
+      Back to event
+    </button>
+  </ng-container>
+</div>

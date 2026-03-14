@@ -1,0 +1,76 @@
+// src/app/my-events/print-qr-dialog/print-qr-dialog.component.scss
+
+.dialog-wrap {
+  display: flex;
+  flex-direction: column;
+  width: 420px;
+  max-width: 100%;
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 8px;
+
+  h2 { margin: 0; font-size: 1.1rem; font-weight: 700; color: #1a1a1a; }
+}
+
+.dialog-body {
+  padding: 0 20px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.qr-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 12px;
+  border: 1px solid #e8e8e8;
+
+  img {
+    width: 130px;
+    height: 130px;
+  }
+
+  .qr-url {
+    font-size: 0.72rem;
+    color: #999;
+    font-family: monospace;
+    text-align: center;
+    word-break: break-all;
+  }
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 20px 16px;
+  border-top: 1px solid #f0f0f0;
+
+  .btn-print {
+    background: #1976d2;
+    color: white;
+    border-radius: 20px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+}

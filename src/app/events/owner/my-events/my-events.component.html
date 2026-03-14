@@ -1,0 +1,100 @@
+<!-- src/app/my-events/my-events.component.html -->
+<div class="events-page">
+  <div class="page-header">
+    <div class="page-header-text">
+      <h2>My Events</h2>
+      <p>Manage your events and packages</p>
+    </div>
+    <button mat-raised-button class="btn-primary" (click)="openCreate()">
+      <mat-icon>add</mat-icon> New Event
+    </button>
+  </div>
+
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Loading events…</p>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && events.length === 0">
+    <mat-icon>event_note</mat-icon>
+    <p>No events yet. Create your first one!</p>
+    <button mat-stroked-button (click)="openCreate()">Create Event</button>
+  </div>
+
+  <div class="event-list" *ngIf="!loading && events.length > 0">
+    <div class="event-card" *ngFor="let ev of events">
+      <div class="event-card-main">
+        <div class="event-card-info">
+          <div class="event-name">{{ ev.eventName }}</div>
+          <div class="event-meta">
+            <span class="meta-item">
+              <mat-icon class="mini">calendar_today</mat-icon>
+              {{ ev.eventDate | date: "mediumDate" }}
+            </span>
+            <span class="meta-item" *ngIf="ev.eventAddress">
+              <mat-icon class="mini">location_on</mat-icon>
+              {{ ev.eventAddress }}
+            </span>
+          </div>
+          <div class="event-badges">
+            <span
+              class="badge badge-status"
+              [class.active]="ev.eventStatus === 'ACTIVE'"
+            >
+              {{ getEventStatus(ev) }}
+            </span>
+            <span class="badge badge-sale" *ngIf="ev.forSale">For Sale</span>
+            <span class="badge badge-public" *ngIf="ev.isPublic">Public</span>
+            <span class="badge badge-private" *ngIf="!ev.isPublic"
+              >Private</span
+            >
+          </div>
+        </div>
+        <div class="event-card-qr" *ngIf="ev.eventQrCode">
+          <span class="qr-code">{{ ev.eventQrCode }}</span>
+        </div>
+      </div>
+
+      <div class="event-card-actions">
+        <button
+          mat-stroked-button
+          class="btn-action"
+          (click)="viewEventPage(ev)"
+        >
+          <mat-icon>visibility</mat-icon> View
+        </button>
+        <button mat-stroked-button class="btn-action" (click)="openEdit(ev)">
+          <mat-icon>edit</mat-icon> Edit
+        </button>
+        <button
+          mat-stroked-button
+          class="btn-action btn-packages"
+          (click)="openPackages(ev)"
+        >
+          <mat-icon>inventory_2</mat-icon> Packages
+          <span class="premium-lock" *ngIf="!isPremium">
+            <mat-icon class="lock-icon">lock</mat-icon>
+          </span>
+        </button>
+        <button mat-stroked-button class="btn-action" (click)="openPrintQr(ev)">
+          <mat-icon>qr_code</mat-icon> Print QR
+        </button>
+        <button
+          mat-stroked-button
+          class="btn-action"
+          (click)="copyEventLink(ev)"
+        >
+          <mat-icon>link</mat-icon> Copy Link
+        </button>
+        <button
+          mat-stroked-button
+          class="btn-action btn-delete"
+          (click)="deleteEvent(ev)"
+          [disabled]="deleting"
+        >
+          <mat-icon>delete_outline</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

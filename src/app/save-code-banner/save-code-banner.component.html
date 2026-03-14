@@ -1,0 +1,74 @@
+<!-- save-event-banner.component.html -->
+<div class="save-modal-backdrop" *ngIf="visible" (click)="dismiss()"></div>
+
+<div class="save-modal" *ngIf="visible">
+  <!-- Header -->
+  <div class="save-modal__header">
+    <div class="save-modal__icon-wrap">
+      <mat-icon>bookmark_border</mat-icon>
+    </div>
+    <div class="save-modal__heading">
+      <div class="save-modal__title">Save these photos</div>
+      <div class="save-modal__sub">Don't lose this link</div>
+    </div>
+    <button class="save-modal__close" (click)="dismiss()" type="button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Actions -->
+  <div class="save-modal__body">
+    <!-- Share — opens native share sheet on mobile -->
+    <button class="save-modal__action" (click)="share()" type="button">
+      <div class="save-modal__action-icon save-modal__action-icon--cyan">
+        <mat-icon>share</mat-icon>
+      </div>
+      <div class="save-modal__action-text">
+        <div class="save-modal__action-title">Share</div>
+        <div class="save-modal__action-sub">
+          Send via WhatsApp, Messages, Email
+        </div>
+      </div>
+      <mat-icon class="save-modal__action-chevron">chevron_right</mat-icon>
+    </button>
+
+    <button class="save-modal__action" (click)="copyLink()" type="button">
+      <div class="save-modal__action-icon save-modal__action-icon--grey">
+        <mat-icon>link</mat-icon>
+      </div>
+      <div class="save-modal__action-text">
+        <div class="save-modal__action-title">Copy link</div>
+        <div class="save-modal__action-sub">Paste it anywhere to come back</div>
+      </div>
+      <mat-icon class="save-modal__action-chevron">chevron_right</mat-icon>
+    </button>
+
+    <!-- Save to history — logged in only -->
+    <button
+      *ngIf="isLoggedIn"
+      class="save-modal__action"
+      (click)="saveToHistory()"
+      type="button"
+    >
+      <div class="save-modal__action-icon save-modal__action-icon--blue">
+        <mat-icon>bookmark_add</mat-icon>
+      </div>
+      <div class="save-modal__action-text">
+        <div class="save-modal__action-title">Save to my account</div>
+        <div class="save-modal__action-sub">Find it later in your history</div>
+      </div>
+      <mat-icon class="save-modal__action-chevron">chevron_right</mat-icon>
+    </button>
+  </div>
+
+  <!-- Footer -->
+  <div class="save-modal__footer">
+    <button
+      class="save-modal__dont-show"
+      (click)="dismissForever()"
+      type="button"
+    >
+      Don't show this again for these photos
+    </button>
+  </div>
+</div>

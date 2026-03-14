@@ -1,0 +1,78 @@
+<!-- src/app/my-events/print-qr-dialog/print-qr-dialog.component.html -->
+<div class="dialog-wrap">
+  <div class="dialog-header">
+    <h2>Print Event QR</h2>
+    <button mat-icon-button (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-body" [formGroup]="form">
+    <!-- QR preview -->
+    <div class="qr-preview">
+      <img *ngIf="qrDataUrl" [src]="qrDataUrl" alt="QR Code" />
+      <div class="qr-url">{{ eventUrl }}</div>
+    </div>
+
+    <!-- Print type tabs -->
+    <mat-tab-group
+      (selectedTabChange)="
+        form.get('type')?.setValue($event.index === 0 ? 'poster' : 'stickers')
+      "
+    >
+      <mat-tab label="Poster (8.5″ × 11″)"></mat-tab>
+      <mat-tab label="Sticker Sheet (2″ cells)"></mat-tab>
+    </mat-tab-group>
+
+    <div class="fields">
+      <!-- Title -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Title (optional)</mat-label>
+        <input
+          matInput
+          formControlName="title"
+          maxlength="50"
+          placeholder="e.g. Scan to view photos"
+        />
+        <mat-hint align="end"
+          >{{ form.get("title")?.value?.length ?? 0 }}/50</mat-hint
+        >
+      </mat-form-field>
+
+      <!-- Footer — only for poster -->
+      <mat-form-field
+        appearance="outline"
+        class="full-width"
+        *ngIf="form.get('type')?.value === 'poster'"
+      >
+        <mat-label>Footer (optional)</mat-label>
+        <input
+          matInput
+          formControlName="footer"
+          maxlength="50"
+          placeholder="e.g. Piqrly.com"
+        />
+        <mat-hint align="end"
+          >{{ form.get("footer")?.value?.length ?? 0 }}/50</mat-hint
+        >
+      </mat-form-field>
+
+      <!-- Font -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Font style</mat-label>
+        <mat-select formControlName="font">
+          <mat-option *ngFor="let f of fonts" [value]="f.value">{{
+            f.label
+          }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <div class="dialog-actions">
+    <button mat-stroked-button (click)="close()">Cancel</button>
+    <button mat-raised-button class="btn-print" (click)="print()">
+      <mat-icon>print</mat-icon> Print
+    </button>
+  </div>
+</div>

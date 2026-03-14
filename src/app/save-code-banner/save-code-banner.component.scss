@@ -1,0 +1,206 @@
+/* save-event-banner.component.scss */
+
+.save-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  z-index: 998;
+  backdrop-filter: blur(2px);
+  animation: fadeIn 180ms ease;
+}
+
+.save-modal {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+  width: min(420px, calc(100vw - 32px));
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.18), 0 4px 16px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+  animation: slideUp 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  // ── HEADER ──────────────────────────────
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 16px 12px;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+  }
+
+  &__icon-wrap {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(43, 189, 238, 0.10);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      color: #2BBDEE;
+    }
+  }
+
+  &__heading {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.2;
+  }
+
+  &__sub {
+    font-size: 12px;
+    color: #0f172a;
+    margin-top: 2px;
+    font-weight: 600;
+  }
+
+  &__close {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(15, 23, 42, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 0;
+    transition: background 0.15s;
+
+    &:hover { background: rgba(15, 23, 42, 0.12); }
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: #64748b;
+    }
+  }
+
+  // ── BODY ────────────────────────────────
+  &__body {
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__action {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 8px;
+    border: none;
+    background: transparent;
+    border-radius: 14px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s;
+
+    &:hover { background: rgba(15, 23, 42, 0.04); }
+    &:active { background: rgba(15, 23, 42, 0.08); }
+  }
+
+  &__action-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+
+    &--cyan {
+      background: rgba(43, 189, 238, 0.10);
+      mat-icon { color: #2BBDEE; }
+    }
+
+    &--grey {
+      background: rgba(15, 23, 42, 0.06);
+      mat-icon { color: #475569; }
+    }
+
+    &--blue {
+      background: rgba(37, 99, 235, 0.10);
+      mat-icon { color: #2563eb; }
+    }
+  }
+
+  &__action-text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__action-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.2;
+  }
+
+  &__action-sub {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 2px;
+  }
+
+  &__action-chevron {
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+    color: #cbd5e1;
+    flex-shrink: 0;
+  }
+
+  // ── FOOTER ──────────────────────────────
+  &__footer {
+    padding: 10px 16px 14px;
+    border-top: 1px solid rgba(15, 23, 42, 0.06);
+    text-align: center;
+  }
+
+  &__dont-show {
+    border: none;
+    background: transparent;
+    font-size: 12px;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 8px;
+    transition: color 0.15s;
+
+    &:hover { color: #475569; }
+  }
+}
+
+@keyframes slideUp {
+  from { transform: translateX(-50%) translateY(24px); opacity: 0; }
+  to   { transform: translateX(-50%) translateY(0);   opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}

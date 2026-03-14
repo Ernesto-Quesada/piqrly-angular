@@ -316,7 +316,6 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
       this.checkoutService.createWebCartCheckoutSession(payload).subscribe({
         next: async (data) => {
-          // ✅ NEW: redirect by URL (Stripe removed redirectToCheckout in newer typings)
           this.redirectToStripeCheckoutUrl(data);
         },
         error: (err) => {
@@ -328,7 +327,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // ✅ 2) QR FLOW
+    // ✅ 2) QR / EVENT / GALLERY FLOW
     this.checkoutState$.pipe(take(1)).subscribe({
       next: (state) => {
         console.log('🔍 STATE ITEMS IN PAY():', JSON.stringify(state.items));
@@ -339,25 +338,41 @@ export class CheckoutComponent implements OnInit, OnDestroy {
           return;
         }
 
-        // ✅ FIX 2: do NOT trust state.subtotalPrice (Gallery was ending up with 0)
-        // Always compute from the items you will charge for.
         const computedTotal = state.items.reduce((sum: number, item: any) => {
           return sum + this.getItemPrice(item);
         }, 0);
 
         const totalCents = Math.round(computedTotal * 100);
 
-        const payload = {
-          totalAmount: totalCents, // cents
+        // ✅ lineItems gives backend size + amount per picture
+        const lineItems = state.items.map((item: any) => ({
+          pictureId: item.image.pictureId,
+          size: item.size ?? null,
+          amount: Math.round(this.getItemPrice(item) * 100),
+        }));
+
+        // ✅ read galleryId from sessionStorage — set by gallery component on goToCheckout()
+        const galleryId = sessionStorage.getItem('checkout_gallery_id') ?? null;
+
+        // ✅ clear immediately so QR/Event flow never picks it up accidentally
+        sessionStorage.removeItem('checkout_gallery_id');
+
+        const payload: any = {
+          totalAmount: totalCents,
           user: state.user,
           pictureIds: state.items.map((item) => item.image.pictureId),
+          lineItems,
         };
+
+        // ✅ only add galleryId when it exists
+        if (galleryId) {
+          payload.galleryId = galleryId;
+        }
 
         console.log('💳 CHECKOUT PAYLOAD DEBUG:', payload);
 
         this.checkoutService.createCheckoutSession(payload).subscribe({
           next: async (data) => {
-            // ✅ NEW: redirect by URL (Stripe removed redirectToCheckout in newer typings)
             this.redirectToStripeCheckoutUrl(data);
           },
           error: (err) => {
